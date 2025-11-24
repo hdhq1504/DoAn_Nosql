@@ -1,5 +1,5 @@
-import React from "react";
-import { Layout, Badge, Dropdown, Avatar, Space, Typography, Button } from "antd";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Layout, Badge, Dropdown, Avatar, Space, Typography, Button, message, Empty } from "antd";
 import {
   BellOutlined,
   SettingOutlined,
@@ -8,13 +8,125 @@ import {
   ProfileOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  UserAddOutlined,
+  FileTextOutlined,
+  CalendarOutlined,
+  DollarCircleOutlined,
 } from "@ant-design/icons";
 import "./Topbar.css";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/vi";
+import { API_BASE_URL, notificationAPI } from "../../services/api";
+
+dayjs.extend(relativeTime);
+dayjs.locale("vi");
 
 const { Header } = Layout;
 const { Text } = Typography;
 
+const TYPE_CONFIG = {
+  customer: { icon: <UserAddOutlined />, color: "#52c41a" },
+  contract: { icon: <FileTextOutlined />, color: "#1890ff" },
+  task: { icon: <CalendarOutlined />, color: "#faad14" },
+  payment: { icon: <DollarCircleOutlined />, color: "#722ed1" },
+};
+
 export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNotificationsClick }) {
+  const [latest, setLatest] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const baseApiUrl = useMemo(() => API_BASE_URL.replace(/\/api$/, ""), []);
+
+  const fetchLatest = useCallback(async () => {
+    try {
+      const response = await notificationAPI.getList({ page: 1, pageSize: 5 });
+      setLatest(response.data.items || []);
+      setUnreadCount(response.data.summary?.unread || 0);
+    } catch (error) {
+      console.error("Failed to load latest notifications", error);
+      message.error("Không thể tải thông báo mới nhất");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLatest();
+  }, [fetchLatest]);
+
+  useEffect(() => {
+    const source = new EventSource(`${baseApiUrl}/api/notification/stream`, { withCredentials: true });
+    source.onmessage = (event) => {
+      try {
+        const summary = JSON.parse(event.data);
+        setUnreadCount(summary.unread ?? 0);
+      } catch (error) {
+        console.error("Failed to parse notification summary", error);
+      }
+      fetchLatest();
+    };
+    source.onerror = (err) => {
+      console.error("Notification stream error", err);
+      source.close();
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [baseApiUrl, fetchLatest]);
+
+  const notificationItems = latest.length
+    ? [
+      ...latest.map((item) => {
+        const config = TYPE_CONFIG[item.type] || { icon: <BellOutlined />, color: "#1890ff" };
+        return {
+          key: item.id,
+          label: (
+            <div className="notification-item">
+              <div className="notification-title">
+                <Space>
+                  <Avatar size={28} icon={config.icon} style={{ backgroundColor: config.color }} />
+                  <span>{item.title}</span>
+                </Space>
+              </div>
+              <div className="notification-desc">{item.description}</div>
+              <div className="notification-time">{dayjs(item.createdAt).fromNow()}</div>
+            </div>
+          ),
+        };
+      }),
+      { type: "divider" },
+      {
+        key: "all",
+        label: (
+          <div style={{ textAlign: "center", color: "#1890ff", cursor: "pointer" }} onClick={onNotificationsClick}>
+            Xem tất cả thông báo
+          </div>
+        ),
+      },
+    ]
+    : [
+      {
+        key: "empty",
+        label: (
+          <div style={{ padding: "12px 24px" }}>
+            <Empty
+              description="Không có thông báo nào"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              imageStyle={{ height: 48 }}
+            />
+          </div>
+        ),
+      },
+      { type: "divider" },
+      {
+        key: "all",
+        label: (
+          <div style={{ textAlign: "center", color: "#1890ff", cursor: "pointer" }} onClick={onNotificationsClick}>
+            Xem tất cả thông báo
+          </div>
+        ),
+      },
+    ];
+
   const userMenuItems = [
     {
       key: "profile",
@@ -38,50 +150,6 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
     },
   ];
 
-  const notificationItems = [
-    {
-      key: "1",
-      label: (
-        <div className="notification-item">
-          <div className="notification-title">Khách hàng mới</div>
-          <div className="notification-desc">Nguyễn Văn An vừa đăng ký</div>
-          <div className="notification-time">5 phút trước</div>
-        </div>
-      ),
-    },
-    {
-      key: "2",
-      label: (
-        <div className="notification-item">
-          <div className="notification-title">Hợp đồng mới</div>
-          <div className="notification-desc">Hợp đồng #1234 cần duyệt</div>
-          <div className="notification-time">10 phút trước</div>
-        </div>
-      ),
-    },
-    {
-      key: "3",
-      label: (
-        <div className="notification-item">
-          <div className="notification-title">Công việc</div>
-          <div className="notification-desc">3 công việc sắp hết hạn</div>
-          <div className="notification-time">1 giờ trước</div>
-        </div>
-      ),
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "all",
-      label: (
-        <div style={{ textAlign: "center", color: "#1890ff", cursor: "pointer" }} onClick={onNotificationsClick}>
-          Xem tất cả thông báo
-        </div>
-      ),
-    },
-  ];
-
   return (
     <Header className="topbar-modern">
       <div className="topbar-left">
@@ -90,7 +158,7 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
           style={{
-            fontSize: '16px',
+            fontSize: "16px",
             width: 40,
             height: 40,
           }}
@@ -99,30 +167,19 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
 
       <div className="topbar-right">
         <Space size="large">
-          {/* Notifications */}
-          <Dropdown
-            menu={{ items: notificationItems }}
-            trigger={["click"]}
-            placement="bottomRight"
-          >
-            <Badge count={3} offset={[-2, 2]}>
+          <Dropdown menu={{ items: notificationItems }} trigger={["click"]} placement="bottomRight">
+            <Badge count={unreadCount} offset={[-2, 2]}>
               <div className="header-icon-btn">
                 <BellOutlined />
               </div>
             </Badge>
           </Dropdown>
 
-          {/* Settings */}
           <div className="header-icon-btn">
             <SettingOutlined />
           </div>
 
-          {/* User Menu */}
-          <Dropdown
-            menu={{ items: userMenuItems }}
-            trigger={["click"]}
-            placement="bottomRight"
-          >
+          <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
             <div className="user-profile">
               <Avatar
                 size={36}

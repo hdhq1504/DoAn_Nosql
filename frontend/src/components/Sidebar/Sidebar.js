@@ -8,6 +8,7 @@ import {
   SoundOutlined,
   BarChartOutlined,
   TeamOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
 
@@ -39,6 +40,11 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
       key: "tasks",
       icon: <CheckSquareOutlined />,
       label: "Quản lý Công việc",
+    },
+    {
+      key: "notifications",
+      icon: <BellOutlined />,
+      label: "Thông báo",
     },
     {
       key: "campaigns",

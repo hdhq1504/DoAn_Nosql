@@ -39,6 +39,7 @@ builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddSingleton<NotificationService>();
 
 
 // Cấu hình Swagger

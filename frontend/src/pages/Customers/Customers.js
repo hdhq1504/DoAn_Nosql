@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import {
   Table,
   Button,
   Modal,
+  Drawer,
+  Tabs,
   Form,
   Input,
   Select,
@@ -17,6 +19,8 @@ import {
   DatePicker,
   Spin,
   Alert,
+  Timeline,
+  Steps,
   message,
 } from "antd";
 import {
@@ -36,15 +40,89 @@ import dayjs from "dayjs";
 const { Title } = Typography;
 const { Option } = Select;
 
+const detailInitialState = {
+  selectedCustomer: null,
+  isDrawerOpen: false,
+  detailLoadingId: null,
+  interactions: [],
+  journey: [],
+  interactionsLoading: false,
+  journeyLoading: false,
+  interactionsError: null,
+  journeyError: null,
+  interactionType: "all",
+  interactionDateRange: null,
+};
+
+function detailReducer(state, action) {
+  switch (action.type) {
+    case "OPEN_DRAWER":
+      return {
+        ...state,
+        selectedCustomer: action.customer,
+        isDrawerOpen: true,
+        detailLoadingId: action.customer?.id || null,
+        interactionType: "all",
+        interactionDateRange: null,
+        interactionsError: null,
+        journeyError: null,
+      };
+    case "CLOSE_DRAWER":
+      return { ...detailInitialState };
+    case "SET_INTERACTIONS_LOADING":
+      return { ...state, interactionsLoading: true, interactionsError: null };
+    case "SET_INTERACTIONS_SUCCESS":
+      return { ...state, interactionsLoading: false, interactions: action.data };
+    case "SET_INTERACTIONS_ERROR":
+      return {
+        ...state,
+        interactionsLoading: false,
+        interactionsError: action.error,
+      };
+    case "SET_JOURNEY_LOADING":
+      return { ...state, journeyLoading: true, journeyError: null };
+    case "SET_JOURNEY_SUCCESS":
+      return { ...state, journeyLoading: false, journey: action.data };
+    case "SET_JOURNEY_ERROR":
+      return { ...state, journeyLoading: false, journeyError: action.error };
+    case "FINISH_DETAIL_LOADING":
+      return { ...state, detailLoadingId: null };
+    case "SET_INTERACTION_TYPE":
+      return { ...state, interactionType: action.value };
+    case "SET_INTERACTION_DATE_RANGE":
+      return { ...state, interactionDateRange: action.value };
+    default:
+      return state;
+  }
+}
+
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [detailState, dispatchDetail] = useReducer(
+    detailReducer,
+    detailInitialState
+  );
   const [searchText, setSearchText] = useState("");
   const [filterSegment, setFilterSegment] = useState("all");
   const [form] = Form.useForm();
+
+  const {
+    selectedCustomer,
+    isDrawerOpen,
+    detailLoadingId,
+    interactions,
+    journey,
+    interactionsLoading,
+    journeyLoading,
+    interactionsError,
+    journeyError,
+    interactionType,
+    interactionDateRange,
+  } = detailState;
 
   // Fetch customers from API
   useEffect(() => {
@@ -91,6 +169,29 @@ export default function Customers() {
 
     return matchesSearch && matchesSegment;
   });
+
+  const interactionTypes = [
+    "all",
+    ...new Set(interactions.map((item) => item.type).filter(Boolean)),
+  ];
+
+  const filteredInteractions = interactions.filter((item) => {
+    const matchesType = interactionType === "all" || item.type === interactionType;
+    const matchesDate = interactionDateRange
+      ? (() => {
+        const date = dayjs(item.date);
+        const start = interactionDateRange[0].startOf("day");
+        const end = interactionDateRange[1].endOf("day");
+        return !date.isBefore(start) && !date.isAfter(end);
+      })()
+      : true;
+    return matchesType && matchesDate;
+  });
+
+  const currentJourneyStep = Math.max(
+    journey.findIndex((step) => step.status === "Current" || step.status === "In Progress"),
+    0
+  );
 
   // Table columns
   const columns = [
@@ -192,10 +293,28 @@ export default function Customers() {
     {
       title: "Hành động",
       key: "action",
-      width: 120,
+      width: 230,
       fixed: "right",
       render: (_, record) => (
         <Space size="small">
+          <Button
+            type="link"
+            onClick={() => handleViewDetails(record)}
+            loading={
+              detailLoadingId === record.id && (interactionsLoading || journeyLoading)
+            }
+          >
+            Xem tương tác
+          </Button>
+          <Button
+            type="link"
+            onClick={() => handleViewDetails(record)}
+            loading={
+              detailLoadingId === record.id && (interactionsLoading || journeyLoading)
+            }
+          >
+            Xem hành trình
+          </Button>
           <Button
             type="link"
             icon={<EditOutlined />}
@@ -235,6 +354,46 @@ export default function Customers() {
       console.error("Error deleting customer:", err);
       message.error("Lỗi khi xóa khách hàng");
     }
+  };
+
+  const fetchInteractions = async (customerId) => {
+    try {
+      dispatchDetail({ type: "SET_INTERACTIONS_LOADING" });
+      const response = await customerAPI.getInteractions(customerId);
+      dispatchDetail({
+        type: "SET_INTERACTIONS_SUCCESS",
+        data: response.data || [],
+      });
+    } catch (err) {
+      console.error("Error fetching interactions:", err);
+      dispatchDetail({
+        type: "SET_INTERACTIONS_ERROR",
+        error: "Không thể tải lịch sử tương tác",
+      });
+    }
+  };
+
+  const fetchJourney = async (customerId) => {
+    try {
+      dispatchDetail({ type: "SET_JOURNEY_LOADING" });
+      const response = await customerAPI.getJourney(customerId);
+      dispatchDetail({
+        type: "SET_JOURNEY_SUCCESS",
+        data: response.data || [],
+      });
+    } catch (err) {
+      console.error("Error fetching journey:", err);
+      dispatchDetail({
+        type: "SET_JOURNEY_ERROR",
+        error: "Không thể tải hành trình khách hàng",
+      });
+    }
+  };
+
+  const handleViewDetails = async (customer) => {
+    dispatchDetail({ type: "OPEN_DRAWER", customer });
+    await Promise.all([fetchInteractions(customer.id), fetchJourney(customer.id)]);
+    dispatchDetail({ type: "FINISH_DETAIL_LOADING" });
   };
 
   const handleAdd = () => {
@@ -282,6 +441,10 @@ export default function Customers() {
   const handleModalCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
+  };
+
+  const handleDrawerClose = () => {
+    dispatchDetail({ type: "CLOSE_DRAWER" });
   };
 
   return (
@@ -379,6 +542,163 @@ export default function Customers() {
           </Col>
         </Row>
       </Card>
+
+      <Drawer
+        title={`Hồ sơ khách hàng${selectedCustomer ? `: ${selectedCustomer.name}` : ""}`}
+        width={800}
+        onClose={handleDrawerClose}
+        open={isDrawerOpen}
+        destroyOnClose
+      >
+        {selectedCustomer && (
+          <>
+            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+              <Col span={12}>
+                <Card size="small" bordered={false}>
+                  <div style={{ fontWeight: 600 }}>{selectedCustomer.company || "Khách lẻ"}</div>
+                  <div style={{ color: "#8c8c8c" }}>{selectedCustomer.email}</div>
+                  <div style={{ color: "#8c8c8c" }}>{selectedCustomer.phone}</div>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card size="small" bordered={false}>
+                  <Space>
+                    <Tag color="blue">{selectedCustomer.segment}</Tag>
+                    <Tag>{selectedCustomer.type}</Tag>
+                  </Space>
+                  <div style={{ color: "#8c8c8c", marginTop: 4 }}>
+                    Ngày tạo: {selectedCustomer.createdDate ? dayjs(selectedCustomer.createdDate).format("DD/MM/YYYY") : "-"}
+                  </div>
+                </Card>
+              </Col>
+            </Row>
+
+            <Tabs
+              defaultActiveKey="interactions"
+              items={[
+                {
+                  key: "interactions",
+                  label: "Lịch sử tương tác",
+                  children: (
+                    <>
+                      <Space style={{ marginBottom: 12 }} wrap>
+                        <DatePicker.RangePicker
+                          value={interactionDateRange}
+                          onChange={(value) =>
+                            dispatchDetail({
+                              type: "SET_INTERACTION_DATE_RANGE",
+                              value,
+                            })
+                          }
+                          format="DD/MM/YYYY"
+                        />
+                        <Select
+                          value={interactionType}
+                          onChange={(value) =>
+                            dispatchDetail({
+                              type: "SET_INTERACTION_TYPE",
+                              value,
+                            })
+                          }
+                          style={{ minWidth: 160 }}
+                        >
+                          {interactionTypes.map((type) => (
+                            <Option key={type} value={type}>
+                              {type === "all" ? "Tất cả loại" : type}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Space>
+
+                      {interactionsError && (
+                        <Alert
+                          message="Lỗi"
+                          description={interactionsError}
+                          type="error"
+                          showIcon
+                          style={{ marginBottom: 12 }}
+                        />
+                      )}
+
+                      <Spin spinning={interactionsLoading}>
+                        {filteredInteractions.length === 0 ? (
+                          <Alert
+                            message="Không có dữ liệu tương tác"
+                            type="info"
+                            showIcon
+                          />
+                        ) : (
+                          <Timeline
+                            mode="left"
+                            items={filteredInteractions.map((item) => ({
+                              color: item.type === "Email" ? "blue" : item.type === "Call" ? "green" : "gray",
+                              label: item.date ? dayjs(item.date).format("DD/MM/YYYY") : "-",
+                              children: (
+                                <div>
+                                  <strong>{item.type || "Tương tác"}</strong>
+                                  <div style={{ color: "#8c8c8c" }}>
+                                    {item.notes || item.description || "Không có ghi chú"}
+                                  </div>
+                                </div>
+                              ),
+                            }))}
+                          />
+                        )}
+                      </Spin>
+                    </>
+                  ),
+                },
+                {
+                  key: "journey",
+                  label: "Hành trình khách hàng",
+                  children: (
+                    <>
+                      {journeyError && (
+                        <Alert
+                          message="Lỗi"
+                          description={journeyError}
+                          type="error"
+                          showIcon
+                          style={{ marginBottom: 12 }}
+                        />
+                      )}
+                      <Spin spinning={journeyLoading}>
+                        {journey.length === 0 ? (
+                          <Alert message="Không có dữ liệu hành trình" type="info" showIcon />
+                        ) : (
+                          <Steps
+                            direction="vertical"
+                            current={currentJourneyStep}
+                            items={journey.map((step) => ({
+                              title: step.stage || step.name || "Bước",
+                              status:
+                                step.status === "Completed"
+                                  ? "finish"
+                                  : step.status === "Current"
+                                    ? "process"
+                                    : "wait",
+                              description: (
+                                <div style={{ color: "#8c8c8c" }}>
+                                  {step.description || step.notes}
+                                  {step.updatedAt && (
+                                    <div style={{ marginTop: 4 }}>
+                                      Cập nhật: {dayjs(step.updatedAt).format("DD/MM/YYYY")}
+                                    </div>
+                                  )}
+                                </div>
+                              ),
+                            }))}
+                          />
+                        )}
+                      </Spin>
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </>
+        )}
+      </Drawer>
 
       {/* Table */}
       <Card>

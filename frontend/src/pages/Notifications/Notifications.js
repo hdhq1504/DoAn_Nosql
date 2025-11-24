@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Card,
   List,
@@ -14,6 +14,7 @@ import {
   Popconfirm,
   Badge,
   Empty,
+  message,
 } from "antd";
 import {
   BellOutlined,
@@ -29,134 +30,126 @@ import "./Notifications.css";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
+import { API_BASE_URL, notificationAPI } from "../../services/api";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
 
 const { Title, Text } = Typography;
 
+const TYPE_CONFIG = {
+  customer: { icon: <UserAddOutlined />, color: "#52c41a" },
+  contract: { icon: <FileTextOutlined />, color: "#1890ff" },
+  task: { icon: <CalendarOutlined />, color: "#faad14" },
+  payment: { icon: <DollarCircleOutlined />, color: "#722ed1" },
+};
+
 export default function Notifications() {
   const [filter, setFilter] = useState("all");
-  const [notifications, setNotifications] = useState([
-    {
-      id: "1",
-      type: "customer",
-      icon: <UserAddOutlined />,
-      color: "#52c41a",
-      title: "Khách hàng mới",
-      description: "Nguyễn Văn An vừa đăng ký tài khoản",
-      time: new Date(Date.now() - 5 * 60 * 1000),
-      read: false,
+  const [notifications, setNotifications] = useState([]);
+  const [summary, setSummary] = useState({ total: 0, unread: 0, read: 0 });
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 5, total: 0 });
+  const [loading, setLoading] = useState(false);
+
+  const baseApiUrl = useMemo(() => API_BASE_URL.replace(/\/api$/, ""), []);
+
+  const fetchNotifications = useCallback(
+    async (page = pagination.current, pageSize = pagination.pageSize) => {
+      setLoading(true);
+      try {
+        const response = await notificationAPI.getList({ filter, page, pageSize });
+        setNotifications(response.data.items || []);
+        setSummary(response.data.summary || { total: 0, unread: 0, read: 0 });
+        setPagination((prev) => ({ ...prev, current: page, pageSize, total: response.data.total || 0 }));
+      } catch (error) {
+        console.error("Failed to load notifications", error);
+        message.error("Không thể tải danh sách thông báo");
+      } finally {
+        setLoading(false);
+      }
     },
-    {
-      id: "2",
-      type: "contract",
-      icon: <FileTextOutlined />,
-      color: "#1890ff",
-      title: "Hợp đồng mới",
-      description: "Hợp đồng #1234 cần được duyệt",
-      time: new Date(Date.now() - 10 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: "3",
-      type: "task",
-      icon: <CalendarOutlined />,
-      color: "#faad14",
-      title: "Công việc sắp hết hạn",
-      description: "3 công việc sẽ hết hạn trong 24 giờ tới",
-      time: new Date(Date.now() - 60 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: "4",
-      type: "payment",
-      icon: <DollarCircleOutlined />,
-      color: "#722ed1",
-      title: "Thanh toán thành công",
-      description: "Khách hàng Trần Thị Bình đã thanh toán ₫45M",
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: "5",
-      type: "customer",
-      icon: <UserAddOutlined />,
-      color: "#52c41a",
-      title: "Khách hàng mới",
-      description: "Công ty TNHH ABC đã đăng ký gói doanh nghiệp",
-      time: new Date(Date.now() - 3 * 60 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: "6",
-      type: "contract",
-      icon: <FileTextOutlined />,
-      color: "#1890ff",
-      title: "Hợp đồng đã ký",
-      description: "Hợp đồng #1230 đã được ký thành công",
-      time: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: "7",
-      type: "task",
-      icon: <CalendarOutlined />,
-      color: "#faad14",
-      title: "Công việc hoàn thành",
-      description: "Lê Minh Cường đã hoàn thành công việc 'Gọi điện tư vấn'",
-      time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: "8",
-      type: "payment",
-      icon: <DollarCircleOutlined />,
-      color: "#722ed1",
-      title: "Thanh toán thất bại",
-      description: "Giao dịch #5678 bị từ chối. Vui lòng kiểm tra lại",
-      time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      read: true,
-    },
-  ]);
+    [filter, pagination.current, pagination.pageSize]
+  );
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    const source = new EventSource(`${baseApiUrl}/api/notification/stream`, { withCredentials: true });
+    source.onmessage = () => {
+      fetchNotifications();
+    };
+    source.onerror = (err) => {
+      console.error("Notification stream error", err);
+      source.close();
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [baseApiUrl, fetchNotifications]);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationAPI.markRead(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error("Failed to mark as read", error);
+      message.error("Không thể cập nhật thông báo");
+    }
+  };
+
+  const handleMarkAsUnread = async (id) => {
+    try {
+      await notificationAPI.markUnread(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error("Failed to mark as unread", error);
+      message.error("Không thể cập nhật thông báo");
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationAPI.markAllRead();
+      fetchNotifications(1, pagination.pageSize);
+    } catch (error) {
+      console.error("Failed to mark all as read", error);
+      message.error("Không thể cập nhật thông báo");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await notificationAPI.delete(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error("Failed to delete notification", error);
+      message.error("Không thể xóa thông báo");
+    }
+  };
+
+  const handlePageChange = (page, pageSize) => {
+    fetchNotifications(page, pageSize);
+  };
 
   const stats = {
-    total: notifications.length,
-    unread: notifications.filter((n) => !n.read).length,
-    read: notifications.filter((n) => n.read).length,
+    total: summary.total,
+    unread: summary.unread,
+    read: summary.read,
   };
 
-  const filteredNotifications = notifications.filter((n) => {
-    if (filter === "unread") return !n.read;
-    if (filter === "read") return n.read;
-    return true;
-  });
-
-  const handleMarkAsRead = (id) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-
-  const handleMarkAsUnread = (id) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: false } : n))
-    );
-  };
-
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
-  };
-
-  const handleDelete = (id) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-  };
+  const filterOptions = [
+    { label: "Tất cả", value: "all" },
+    { label: "Chưa đọc", value: "unread" },
+    { label: "Đã đọc", value: "read" },
+  ];
 
   return (
     <div className="notifications-page">
       <Title level={2}>Thông báo</Title>
 
-      {/* Statistics */}
       <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} sm={8}>
           <Card>
@@ -190,18 +183,16 @@ export default function Notifications() {
         </Col>
       </Row>
 
-      {/* Toolbar */}
       <Card className="toolbar-card">
         <Row justify="space-between" align="middle" gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <Segmented
               value={filter}
-              onChange={setFilter}
-              options={[
-                { label: "Tất cả", value: "all" },
-                { label: "Chưa đọc", value: "unread" },
-                { label: "Đã đọc", value: "read" },
-              ]}
+              onChange={(value) => {
+                setFilter(value);
+                fetchNotifications(1, pagination.pageSize);
+              }}
+              options={filterOptions}
               size="large"
             />
           </Col>
@@ -218,86 +209,80 @@ export default function Notifications() {
         </Row>
       </Card>
 
-      {/* Notifications List */}
       <Card className="notifications-card">
-        {filteredNotifications.length === 0 ? (
+        {notifications.length === 0 ? (
           <Empty description="Không có thông báo" />
         ) : (
           <List
             itemLayout="horizontal"
-            dataSource={filteredNotifications}
-            renderItem={(item) => (
-              <List.Item
-                className={`notification-item ${!item.read ? "unread" : ""}`}
-                actions={[
-                  item.read ? (
-                    <Button
-                      type="text"
-                      size="small"
-                      onClick={() => handleMarkAsUnread(item.id)}
+            dataSource={notifications}
+            loading={loading}
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: pagination.total,
+              onChange: handlePageChange,
+              showSizeChanger: true,
+              pageSizeOptions: [5, 10, 20],
+            }}
+            renderItem={(item) => {
+              const config = TYPE_CONFIG[item.type] || { icon: <BellOutlined />, color: "#1890ff" };
+              return (
+                <List.Item
+                  className={`notification-item ${!item.isRead ? "unread" : ""}`}
+                  actions={[
+                    item.isRead ? (
+                      <Button type="text" size="small" onClick={() => handleMarkAsUnread(item.id)}>
+                        Đánh dấu chưa đọc
+                      </Button>
+                    ) : (
+                      <Button type="text" size="small" onClick={() => handleMarkAsRead(item.id)}>
+                        Đánh dấu đã đọc
+                      </Button>
+                    ),
+                    <Popconfirm
+                      title="Xóa thông báo"
+                      description="Bạn có chắc muốn xóa thông báo này?"
+                      onConfirm={() => handleDelete(item.id)}
+                      okText="Xóa"
+                      cancelText="Hủy"
+                      okButtonProps={{ danger: true }}
                     >
-                      Đánh dấu chưa đọc
-                    </Button>
-                  ) : (
-                    <Button
-                      type="text"
-                      size="small"
-                      onClick={() => handleMarkAsRead(item.id)}
-                    >
-                      Đánh dấu đã đọc
-                    </Button>
-                  ),
-                  <Popconfirm
-                    title="Xóa thông báo"
-                    description="Bạn có chắc muốn xóa thông báo này?"
-                    onConfirm={() => handleDelete(item.id)}
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    okButtonProps={{ danger: true }}
-                  >
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      icon={<DeleteOutlined />}
-                    />
-                  </Popconfirm>,
-                ]}
-              >
-                <List.Item.Meta
-                  avatar={
-                    <Badge dot={!item.read} offset={[-5, 5]}>
-                      <Avatar
-                        icon={item.icon}
-                        style={{ backgroundColor: item.color }}
-                        size={48}
-                      />
-                    </Badge>
-                  }
-                  title={
-                    <Space>
-                      <Text strong style={{ fontSize: 15 }}>
-                        {item.title}
-                      </Text>
-                      {!item.read && (
-                        <Tag color="orange" style={{ fontSize: 11 }}>
-                          Mới
-                        </Tag>
-                      )}
-                    </Space>
-                  }
-                  description={
-                    <div>
-                      <Text type="secondary">{item.description}</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {dayjs(item.time).fromNow()}
-                      </Text>
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
+                      <Button type="text" danger size="small" icon={<DeleteOutlined />} />
+                    </Popconfirm>,
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={
+                      <Badge dot={!item.isRead} offset={[-5, 5]}>
+                        <Avatar icon={config.icon} style={{ backgroundColor: config.color }} size={48} />
+                      </Badge>
+                    }
+                    title={
+                      <Space>
+                        <Text strong style={{ fontSize: 15 }}>
+                          {item.title}
+                        </Text>
+                        {!item.isRead && (
+                          <Tag color="orange" style={{ fontSize: 11 }}>
+                            Mới
+                          </Tag>
+                        )}
+                      </Space>
+                    }
+                    description={
+                      <div>
+                        <Text type="secondary">{item.description}</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {dayjs(item.createdAt).fromNow()}
+                        </Text>
+                      </div>
+                    }
+                  />
+                </List.Item>
+              );
+            }}
           />
         )}
       </Card>

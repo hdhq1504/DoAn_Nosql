@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API Base URL - Backend runs on HTTP for development
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:5001/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:5001/api';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -111,6 +111,15 @@ export const employeeAPI = {
   create: (data) => apiClient.post('/employees', data),
   update: (id, data) => apiClient.put(`/employees/${id}`, data),
   delete: (id) => apiClient.delete(`/employees/${id}`),
+};
+
+// Notification API
+export const notificationAPI = {
+  getList: (params) => apiClient.get('/notification', { params }),
+  markRead: (id) => apiClient.post(`/notification/${id}/read`),
+  markUnread: (id) => apiClient.post(`/notification/${id}/unread`),
+  markAllRead: () => apiClient.post('/notification/mark-all-read'),
+  delete: (id) => apiClient.delete(`/notification/${id}`),
 };
 
 export default apiClient;
