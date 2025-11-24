@@ -1,0 +1,193 @@
+@import "../../styles/variables.css";
+
+/* Custom Sidebar Styling */
+.sidebar-custom {
+  background: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.sidebar-custom .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+.logo-icon-collapsed {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+  margin: 0 auto;
+}
+
+.logo-text h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.logo-text p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.2;
+}
+
+.collapse-trigger {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.collapse-trigger:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* Menu Styling */
+.sidebar-menu {
+  flex: 1;
+  border-right: none !important;
+  background: transparent !important;
+  margin-top: 8px;
+}
+
+.sidebar-menu .ant-menu-item {
+  margin: 4px 8px;
+  border-radius: 8px;
+  height: 44px;
+  line-height: 44px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s;
+}
+
+.sidebar-menu .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.sidebar-menu .ant-menu-item-selected {
+  background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%) !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.sidebar-menu .ant-menu-item-selected::after {
+  display: none;
+}
+
+.sidebar-menu .ant-menu-item-icon {
+  font-size: 18px;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.sidebar-footer p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Collapsed state adjustments */
+.ant-layout-sider-collapsed .sidebar-header {
+  padding: 20px 12px;
+  justify-content: center;
+}
+
+.ant-layout-sider-collapsed .collapse-trigger {
+  display: none;
+}
+
+.ant-layout-sider-collapsed .sidebar-menu .ant-menu-item {
+  padding: 0 calc(50% - 18px);
+}
+
+/* Scrollbar for menu */
+.sidebar-custom .ant-layout-sider-children::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-custom .ant-layout-sider-children::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-custom .ant-layout-sider-children::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-custom .ant-layout-sider-children::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation */
+.sidebar-custom {
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar-custom {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+  }
+}

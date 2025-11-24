@@ -1,0 +1,155 @@
+@import "../../styles/variables.css";
+
+/* Notifications Page */
+.notifications-page {
+  padding: 0;
+}
+
+.notifications-page .ant-typography {
+  margin-bottom: 24px;
+}
+
+/* Statistics Row */
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stats-row .ant-card {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s;
+}
+
+.stats-row .ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Toolbar Card */
+.toolbar-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.toolbar-card .ant-segmented {
+  background: #f5f5f5;
+}
+
+/* Notifications Card */
+.notifications-card {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.notifications-card .ant-list-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.notifications-card .ant-list-item:last-child {
+  border-bottom: none;
+}
+
+.notifications-card .ant-list-item:hover {
+  background: #fafafa;
+}
+
+/* Notification Item */
+.notification-item.unread {
+  background: #f0f7ff;
+  border-left: 4px solid #1890ff;
+}
+
+.notification-item.unread:hover {
+  background: #e6f4ff;
+}
+
+.notification-item .ant-list-item-meta-avatar {
+  margin-right: 16px;
+}
+
+.notification-item .ant-list-item-meta-title {
+  margin-bottom: 4px;
+}
+
+.notification-item .ant-list-item-meta-description {
+  font-size: 13px;
+}
+
+.notification-item .ant-list-item-action {
+  margin-left: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar-card .ant-row {
+    flex-direction: column;
+  }
+
+  .toolbar-card .ant-col {
+    text-align: left !important;
+  }
+
+  .toolbar-card .ant-btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .notification-item .ant-list-item-action {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+/* Animation */
+.stats-row .ant-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.toolbar-card,
+.notifications-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.notification-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

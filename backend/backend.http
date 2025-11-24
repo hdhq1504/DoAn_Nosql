@@ -1,0 +1,6 @@
+@backend_HostAddress = http://localhost:5064
+
+GET {{backend_HostAddress}}/weatherforecast/
+Accept: application/problem+json; charset=utf-8
+
+###

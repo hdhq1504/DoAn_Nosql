@@ -1,0 +1,100 @@
+@import "../../styles/variables.css";
+
+/* Campaigns Page */
+.campaigns-page-modern {
+  padding: 0;
+}
+
+.campaigns-page-modern .ant-typography {
+  margin-bottom: 24px;
+}
+
+/* Statistics Row */
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stats-row .ant-card {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s;
+}
+
+.stats-row .ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Toolbar Card */
+.toolbar-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Table Card */
+.table-card {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.table-card .ant-table {
+  font-size: 14px;
+}
+
+.table-card .ant-table-thead>tr>th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+}
+
+.table-card .ant-table-tbody>tr:hover>td {
+  background: #f5f5f5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar-card .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .toolbar-card .ant-btn {
+    width: 100%;
+  }
+}
+
+/* Animation */
+.stats-row .ant-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.toolbar-card,
+.table-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

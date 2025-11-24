@@ -1,0 +1,55 @@
+@import "./styles/variables.css";
+
+/* Main content area */
+.main-content {
+  padding: 24px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 64px);
+  transition: all 0.2s;
+}
+
+/* Smooth transitions for layout changes */
+.ant-layout {
+  transition: all 0.2s;
+}
+
+.ant-layout-sider {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading state */
+.loading {
+  font-size: var(--font-large);
+  color: var(--loading-color);
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Error state */
+.error {
+  color: var(--error-color);
+  font-weight: bold;
+  margin-top: var(--spacing-small);
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Data block */
+.data-block {
+  background: var(--data-bg);
+  color: var(--data-text);
+  padding: var(--spacing-medium);
+  border-radius: var(--radius-medium);
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  overflow-x: auto;
+  margin-top: var(--spacing-medium);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px;
+  }
+}

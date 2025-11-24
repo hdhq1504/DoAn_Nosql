@@ -1,0 +1,113 @@
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.Development.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.staticwebassets.endpoints.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.exe
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.deps.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.runtimeconfig.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\backend.pdb
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.OpenApi.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.AssemblyReference.cache
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfoInputs.cache
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfo.cs
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.CoreCompileInputs.cache
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\scopedcss\bundle\backend.styles.css
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.development.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets\msbuild.backend.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets\msbuild.backend.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets\msbuild.build.backend.props
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.backend.props
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.backend.props
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.Up2Date
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\refint\backend.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.pdb
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\backend.genruntimeconfig.cache
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\obj\Debug\net9.0\ref\backend.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Neo4j.Driver.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Zalo\Ngon_Ngu\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.Development.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.staticwebassets.endpoints.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.exe
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.deps.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.runtimeconfig.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\backend.pdb
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.OpenApi.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Neo4j.Driver.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Newtonsoft.Json.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.AssemblyReference.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.GeneratedMSBuildEditorConfig.editorconfig
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfoInputs.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfo.cs
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.CoreCompileInputs.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cs
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\rjimswa.dswa.cache.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\scopedcss\bundle\backend.styles.css
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.json.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.development.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\swae.build.ex.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.Up2Date
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\refint\backend.dll
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.pdb
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\backend.genruntimeconfig.cache
+D:\Thanh Tung\Tai lieu DH\HUIT (2023-2026)\2025-2026\09.HK1 (2025)\Du lieu NoSQL\DoAn_Nosql\backend\obj\Debug\net9.0\ref\backend.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.Development.json
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\appsettings.json
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.staticwebassets.endpoints.json
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.exe
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.deps.json
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.runtimeconfig.json
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\backend.pdb
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Microsoft.OpenApi.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Neo4j.Driver.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Newtonsoft.Json.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\DevTools\projects\DoAn_Nosql\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.AssemblyReference.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.GeneratedMSBuildEditorConfig.editorconfig
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfoInputs.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.AssemblyInfo.cs
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.CoreCompileInputs.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cs
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.MvcApplicationPartsAssemblyInfo.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\rjimswa.dswa.cache.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\scopedcss\bundle\backend.styles.css
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.json.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.development.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.csproj.Up2Date
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.dll
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\refint\backend.dll
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.pdb
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\backend.genruntimeconfig.cache
+D:\DevTools\projects\DoAn_Nosql\backend\obj\Debug\net9.0\ref\backend.dll

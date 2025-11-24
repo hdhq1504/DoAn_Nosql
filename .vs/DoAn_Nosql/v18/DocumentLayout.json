@@ -1,0 +1,201 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\khachhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\khachhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\windowsforms\\khachhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\khachhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\formthemmoi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\formthemmoi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\formthemmoi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\formthemmoi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\classkh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\classkh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\windowsforms\\themecolor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\themecolor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|d:\\thanh tung\\tai lieu dh\\huit (2023-2026)\\2025-2026\\09.hk1 (2025)\\du lieu nosql\\doan_nosql\\windowsforms\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\windowsforms\\sanpham.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\sanpham.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\windowsforms\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\windowsforms\\dashboardusercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{35AC70B2-437D-4FAE-BF12-16D7ACB4A7B8}|WindowsForms\\WindowsForms.csproj|solutionrelative:windowsforms\\dashboardusercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FormThemMoi.cs [Design]",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\FormThemMoi.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\FormThemMoi.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\FormThemMoi.cs [Design]",
+              "RelativeToolTip": "WindowsForms\\FormThemMoi.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T23:06:56.046Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FormThemMoi.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\FormThemMoi.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\FormThemMoi.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\FormThemMoi.cs",
+              "RelativeToolTip": "WindowsForms\\FormThemMoi.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAowDsAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T23:09:02.076Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ClassKH.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\ClassKH.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\ClassKH.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\ClassKH.cs",
+              "RelativeToolTip": "WindowsForms\\ClassKH.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAADwvxIAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T23:41:29.326Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "KhachHang.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\KhachHang.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\KhachHang.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\KhachHang.cs",
+              "RelativeToolTip": "WindowsForms\\KhachHang.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T23:08:03.999Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "KhachHang.cs [Design]",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\KhachHang.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\KhachHang.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\KhachHang.cs [Design]",
+              "RelativeToolTip": "WindowsForms\\KhachHang.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T17:18:35.437Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Program.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\Program.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Program.cs",
+              "RelativeToolTip": "WindowsForms\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T23:49:22.907Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ThemeColor.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\ThemeColor.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\ThemeColor.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\ThemeColor.cs",
+              "RelativeToolTip": "WindowsForms\\ThemeColor.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAQwEIAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T14:03:54.84Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Form1.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\Form1.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Form1.cs [Design]",
+              "RelativeToolTip": "WindowsForms\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-17T15:28:14.326Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SanPham.cs [Design]",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\SanPham.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\SanPham.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\SanPham.cs [Design]",
+              "RelativeToolTip": "WindowsForms\\SanPham.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T17:51:10.132Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Form1.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\Form1.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\Form1.cs",
+              "RelativeToolTip": "WindowsForms\\Form1.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAhwDAAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T15:49:23.177Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DashboardUserControl.cs [Design]",
+              "DocumentMoniker": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\DashboardUserControl.cs",
+              "RelativeDocumentMoniker": "WindowsForms\\DashboardUserControl.cs",
+              "ToolTip": "D:\\Thanh Tung\\Tai lieu DH\\HUIT (2023-2026)\\2025-2026\\09.HK1 (2025)\\Du lieu NoSQL\\DoAn_Nosql\\WindowsForms\\DashboardUserControl.cs [Design]",
+              "RelativeToolTip": "WindowsForms\\DashboardUserControl.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T15:47:01.846Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

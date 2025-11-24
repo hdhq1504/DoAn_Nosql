@@ -1,0 +1,267 @@
+@import "../../styles/variables.css";
+
+/* Tasks Page */
+.tasks-page-modern {
+  padding: 0;
+}
+
+/* Header */
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.tasks-header h2 {
+  margin: 0;
+}
+
+/* Statistics Row */
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stat-card-compact {
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s;
+}
+
+.stat-card-compact:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-card-compact .ant-card-body {
+  padding: 16px;
+}
+
+.stat-card-compact .ant-statistic-title {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+/* Kanban Title */
+.kanban-title {
+  margin-bottom: 16px;
+}
+
+.kanban-title h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Kanban Board Container */
+.kanban-board-container {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* Kanban Column */
+.kanban-column {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-column-header {
+  padding: 12px 16px;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  border-radius: 8px 8px 0 0;
+}
+
+.kanban-column-body {
+  padding: 12px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 600px;
+  min-height: 400px;
+}
+
+/* Scrollbar for Kanban columns */
+.kanban-column-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kanban-column-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.kanban-column-body::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 3px;
+}
+
+.kanban-column-body::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+/* Task Card */
+.kanban-task-card {
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s;
+}
+
+.kanban-task-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #1890ff;
+}
+
+.kanban-task-card .ant-card-body {
+  padding: 12px;
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.task-title {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.priority-tag {
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.task-description {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.task-meta {
+  margin-bottom: 8px;
+}
+
+.task-assignee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.customer-tag {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.task-actions .ant-btn {
+  padding: 0 8px;
+  height: 28px;
+  font-size: 12px;
+}
+
+/* Empty State */
+.kanban-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #bfbfbf;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .kanban-column {
+    margin-bottom: 16px;
+  }
+
+  .kanban-column-body {
+    max-height: 400px;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tasks-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tasks-header .ant-btn {
+    width: 100%;
+  }
+
+  .kanban-board-container {
+    padding: 12px;
+  }
+}
+
+/* Animation */
+.stat-card-compact {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.kanban-column {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.kanban-task-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

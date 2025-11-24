@@ -1,0 +1,28 @@
+:root {
+  /* Colors */
+  --primary-color: #0d47a1; /* xanh dương nổi bật */
+  --background-color: #f5f7fa; /* nền sáng, trung tính, dễ nhìn */
+  --text-color: #1f2a36; /* chữ tối trên nền sáng */
+  --error-color: #ff6b6b; /* đỏ nổi bật */
+  --success-color: #4caf50; /* xanh lá */
+  --warning-color: #ffb74d; /* cam nhẹ */
+  --loading-color: #607d8b; /* xám trung tính */
+  --data-bg: #ffffff; /* khối data nền trắng sáng */
+  --data-text: #1f2a36; /* chữ tối trên khối data */
+
+  /* Font sizes */
+  --font-small: 13px;
+  --font-medium: 16px;
+  --font-large: 20px;
+  --font-xlarge: calc(12px + 2vmin);
+
+  /* Spacing */
+  --spacing-small: 10px;
+  --spacing-medium: 20px;
+  --spacing-large: 40px;
+
+  /* Border radius */
+  --radius-small: 6px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+}
