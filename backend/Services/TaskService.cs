@@ -154,6 +154,41 @@ namespace backend.Service
         }
 
         // ----------------------------
+        // PUT /api/tasks/{id} – cập nhật thông tin task
+        // ----------------------------
+        public async Task<TaskModel?> UpdateTaskAsync(string id, TaskModel task)
+        {
+            var cypher = $@"
+            MATCH (t:Task {{id:'{id}'}})
+            SET t.title = '{task.title}',
+                t.description = '{task.description}',
+                t.priority = '{task.priority}',
+                t.status = '{task.status}',
+                t.type = '{task.type}',
+                t.dueDate = datetime('{task.dueDate:O}')
+            RETURN t";
+
+            var doc = await RunCypherAsync(cypher);
+            var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
+
+            if (data.GetArrayLength() == 0) return null;
+            return JsonSerializer.Deserialize<TaskModel>(data[0].GetProperty("row")[0].GetRawText());
+        }
+
+        // ----------------------------
+        // DELETE /api/tasks/{id} – xóa task
+        // ----------------------------
+        public async Task<bool> DeleteTaskAsync(string id)
+        {
+            var cypher = $@"
+            MATCH (t:Task {{id:'{id}'}})
+            DETACH DELETE t";
+
+            await RunCypherAsync(cypher);
+            return true;
+        }
+
+        // ----------------------------
         // GET /api/employees/kpi – bảng KPI tất cả nhân viên
         // ----------------------------
         public async Task<IEnumerable<KPI>> GetAllKPIsAsync()

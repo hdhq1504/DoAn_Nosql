@@ -12,7 +12,16 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+            policy.WithOrigins(
+                      "http://localhost:3000", 
+                      "https://localhost:3000",
+                      "http://localhost:3001",
+                      "https://localhost:3001",
+                      "http://127.0.0.1:3000",
+                      "https://127.0.0.1:3000",
+                      "http://127.0.0.1:3001",
+                      "https://127.0.0.1:3001"
+                  )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();
@@ -29,6 +38,7 @@ builder.Services.AddScoped<CampaignService>();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<ContractService>();
+builder.Services.AddScoped<EmployeeService>();
 
 
 // Cấu hình Swagger
@@ -57,7 +67,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Sử dụng CORS
+// Sử dụng CORS (phải đặt trước UseHttpsRedirection)
 app.UseCors("AllowReactApp");
 
 app.UseHttpsRedirection();

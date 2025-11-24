@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Button,
@@ -16,6 +16,8 @@ import {
   Typography,
   Progress,
   InputNumber,
+  message,
+  Spin
 } from "antd";
 import {
   PlusOutlined,
@@ -26,7 +28,7 @@ import {
   CheckCircleOutlined,
   DollarOutlined,
 } from "@ant-design/icons";
-import { mockCampaigns } from "../../data/mockData";
+import { campaignAPI } from "../../services/api";
 import "./Campaigns.css";
 import dayjs from "dayjs";
 
@@ -34,10 +36,28 @@ const { Title } = Typography;
 const { Option } = Select;
 
 export default function Campaigns() {
-  const [campaigns, setCampaigns] = useState(mockCampaigns);
+  const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [form] = Form.useForm();
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true);
+      const response = await campaignAPI.getAll();
+      setCampaigns(response.data);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      message.error("Không thể tải danh sách chiến dịch");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, []);
 
   // Statistics
   const stats = {
@@ -193,8 +213,14 @@ export default function Campaigns() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setCampaigns(campaigns.filter((c) => c.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await campaignAPI.delete(id);
+      message.success("Đã xóa chiến dịch");
+      fetchCampaigns();
+    } catch (error) {
+      message.error("Không thể xóa chiến dịch");
+    }
   };
 
   const handleAdd = () => {
@@ -204,29 +230,30 @@ export default function Campaigns() {
   };
 
   const handleModalOk = () => {
-    form.validateFields().then((values) => {
-      const formattedValues = {
-        ...values,
-        startDate: values.startDate ? values.startDate.toISOString() : null,
-        endDate: values.endDate ? values.endDate.toISOString() : null,
-      };
-
-      if (editingCampaign) {
-        setCampaigns(
-          campaigns.map((c) =>
-            c.id === editingCampaign.id ? { ...c, ...formattedValues } : c
-          )
-        );
-      } else {
-        const newCampaign = {
-          id: `C${Date.now()}`,
-          ...formattedValues,
+    form.validateFields().then(async (values) => {
+      try {
+        const formattedValues = {
+          ...values,
+          startDate: values.startDate ? values.startDate.toISOString() : null,
+          endDate: values.endDate ? values.endDate.toISOString() : null,
         };
-        setCampaigns([...campaigns, newCampaign]);
-      }
 
-      setIsModalOpen(false);
-      form.resetFields();
+        if (editingCampaign) {
+          await campaignAPI.update(editingCampaign.id, formattedValues);
+          message.success("Đã cập nhật chiến dịch");
+        } else {
+          await campaignAPI.create({
+            ...formattedValues,
+            id: `CAM${Date.now()}` // Generate ID if backend doesn't
+          });
+          message.success("Đã thêm chiến dịch mới");
+        }
+        setIsModalOpen(false);
+        form.resetFields();
+        fetchCampaigns();
+      } catch (error) {
+        message.error("Có lỗi xảy ra");
+      }
     });
   };
 
@@ -236,6 +263,16 @@ export default function Campaigns() {
   };
 
   const formatMoney = (value) => Number(value || 0).toLocaleString("vi-VN");
+
+  if (loading) {
+    return (
+      <div className="campaigns-loading">
+        <Spin size="large" tip="Đang tải chiến dịch...">
+          <div style={{ height: 200 }} />
+        </Spin>
+      </div>
+    );
+  }
 
   return (
     <div className="campaigns-page-modern">
@@ -335,16 +372,7 @@ export default function Campaigns() {
       >
         <Form form={form} layout="vertical">
           <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="id"
-                label="ID"
-                rules={[{ required: true, message: "Vui lòng nhập ID" }]}
-              >
-                <Input disabled={!!editingCampaign} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
+            <Col span={24}>
               <Form.Item
                 name="name"
                 label="Tên chiến dịch"

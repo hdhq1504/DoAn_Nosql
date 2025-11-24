@@ -12,6 +12,7 @@ import Campaigns from "./pages/Campaigns/Campaigns";
 import Reports from "./pages/Reports/Reports";
 import Profile from "./pages/Profile/Profile";
 import Notifications from "./pages/Notifications/Notifications";
+import Employees from "./pages/Employees/Employees";
 
 const { Content } = Layout;
 
@@ -33,6 +34,8 @@ export default function App() {
         return <Campaigns />;
       case "reports":
         return <Reports />;
+      case "employees":
+        return <Employees />;
       case "profile":
         return <Profile />;
       case "notifications":

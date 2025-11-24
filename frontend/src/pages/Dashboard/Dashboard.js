@@ -1,5 +1,5 @@
-import React from "react";
-import { Row, Col, Card, Statistic, List, Avatar, Progress, Typography, Tag } from "antd";
+import React, { useEffect, useState } from "react";
+import { Row, Col, Card, Statistic, Avatar, Progress, Typography, Tag, Spin, message, Button } from "antd";
 import {
   UserOutlined,
   DollarOutlined,
@@ -9,12 +9,11 @@ import {
   TrophyOutlined,
 } from "@ant-design/icons";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -22,68 +21,25 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { analyticsAPI } from "../../services/api";
 import "./Dashboard.css";
 
 const { Title, Text } = Typography;
 
 export default function Dashboard() {
-  const statsData = [
-    {
-      title: "Tổng khách hàng",
-      value: 2847,
-      prefix: <UserOutlined />,
-      suffix: <ArrowUpOutlined style={{ color: "#52c41a", fontSize: 12 }} />,
-      valueStyle: { color: "#1890ff" },
-      precision: 0,
-      growth: "+12%",
-    },
-    {
-      title: "Doanh thu tháng này",
-      value: 4200000000,
-      prefix: <DollarOutlined />,
-      suffix: "₫",
-      valueStyle: { color: "#52c41a" },
-      precision: 1,
-      growth: "+8%",
-    },
-    {
-      title: "Hợp đồng mới",
-      value: 156,
-      prefix: <FileTextOutlined />,
-      valueStyle: { color: "#722ed1" },
-      precision: 0,
-      growth: "+23%",
-    },
-    {
-      title: "Công việc chờ",
-      value: 28,
-      prefix: <CheckCircleOutlined />,
-      valueStyle: { color: "#fa8c16" },
-      precision: 0,
-      growth: "+5%",
-    },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    totalRevenue: 0,
+    totalTasks: 0,
+    totalEmployees: 0
+  });
+  const [revenueData, setRevenueData] = useState([]);
+  const [pipelineData, setPipelineData] = useState([]);
+  const [topStaff, setTopStaff] = useState([]);
 
-  // Chart data
-  const revenueData = [
-    { month: "T1", revenue: 2800, target: 3000 },
-    { month: "T2", revenue: 3200, target: 3200 },
-    { month: "T3", revenue: 3600, target: 3400 },
-    { month: "T4", revenue: 3400, target: 3600 },
-    { month: "T5", revenue: 3900, target: 3800 },
-    { month: "T6", revenue: 4200, target: 4000 },
-  ];
-
-  const customerGrowthData = [
-    { month: "T1", new: 120, total: 2400 },
-    { month: "T2", new: 145, total: 2545 },
-    { month: "T3", new: 132, total: 2677 },
-    { month: "T4", new: 156, total: 2833 },
-    { month: "T5", new: 142, total: 2975 },
-    { month: "T6", new: 168, total: 3143 },
-  ];
-
-  const recentActivities = [
+  // Mock data for missing APIs
+  const [recentActivities] = useState([
     {
       name: "Nguyễn Văn An",
       action: "Ký hợp đồng bảo hiểm nhân thọ",
@@ -105,60 +61,119 @@ export default function Dashboard() {
       time: "1 giờ trước",
       avatar: null,
     },
+  ]);
+
+  const [customerGrowthData] = useState([
+    { month: "T1", new: 120, total: 2400 },
+    { month: "T2", new: 145, total: 2545 },
+    { month: "T3", new: 132, total: 2677 },
+    { month: "T4", new: 156, total: 2833 },
+    { month: "T5", new: 142, total: 2975 },
+    { month: "T6", new: 168, total: 3143 },
+  ]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [dashboardRes, revenueRes, pipelineRes, employeeRes] = await Promise.all([
+          analyticsAPI.getDashboard(),
+          analyticsAPI.getMonthlyRevenue(),
+          analyticsAPI.getPipeline(),
+          analyticsAPI.getEmployeePerformance()
+        ]);
+
+        setStats(dashboardRes.data);
+
+        // Format Revenue Data
+        const formattedRevenue = revenueRes.data.map(item => ({
+          month: `T${item.month}`,
+          revenue: item.totalRevenue / 1000000, // Convert to Millions
+          target: (item.totalRevenue * 1.1) / 1000000 // Mock target
+        }));
+        setRevenueData(formattedRevenue);
+
+        // Format Pipeline Data
+        const colors = ["#1890ff", "#722ed1", "#faad14", "#fa8c16", "#52c41a"];
+        const formattedPipeline = pipelineRes.data.map((item, index) => ({
+          stage: item.stage,
+          customers: item.dealCount,
+          value: `₫${(item.totalValue / 1000000).toFixed(0)}M`,
+          percent: Math.min(100, item.dealCount * 10), // Mock percent logic
+          color: colors[index % colors.length]
+        }));
+        setPipelineData(formattedPipeline);
+
+        // Format Top Staff
+        const formattedStaff = employeeRes.data
+          .sort((a, b) => b.totalRevenue - a.totalRevenue)
+          .slice(0, 4)
+          .map(item => ({
+            name: item.employeeName,
+            role: "Nhân viên",
+            value: `₫${(item.totalRevenue / 1000000).toFixed(0)}M`,
+            contracts: `${item.totalCustomers} KH`,
+            avatar: null
+          }));
+        setTopStaff(formattedStaff);
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        message.error("Không thể tải dữ liệu dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const statsCards = [
     {
-      name: "Lê Minh Cường",
-      action: "Đặt lịch meeting tư vấn",
-      amount: "-",
-      time: "2 giờ trước",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
+      title: "Tổng khách hàng",
+      value: stats.totalCustomers,
+      prefix: <UserOutlined />,
+      suffix: <ArrowUpOutlined style={{ color: "#52c41a", fontSize: 12 }} />,
+      valueStyle: { color: "#1890ff" },
+      precision: 0,
+      growth: "+12%", // Mock growth
     },
     {
-      name: "Phạm Thu Hà",
-      action: "Yêu cầu báo giá bảo hiểm sức khỏe",
-      amount: "₫35M",
-      time: "3 giờ trước",
-      avatar: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1",
+      title: "Doanh thu tổng",
+      value: stats.totalRevenue,
+      prefix: <DollarOutlined />,
+      suffix: "₫",
+      valueStyle: { color: "#52c41a" },
+      precision: 0,
+      growth: "+8%", // Mock growth
+    },
+    {
+      title: "Nhân viên",
+      value: stats.totalEmployees,
+      prefix: <FileTextOutlined />,
+      valueStyle: { color: "#722ed1" },
+      precision: 0,
+      growth: "+23%", // Mock growth
+    },
+    {
+      title: "Tổng công việc",
+      value: stats.totalTasks,
+      prefix: <CheckCircleOutlined />,
+      valueStyle: { color: "#fa8c16" },
+      precision: 0,
+      growth: "+5%", // Mock growth
     },
   ];
 
-  const topStaff = [
-    {
-      name: "Nguyễn Thị Mai",
-      role: "Senior Consultant",
-      value: "₫890M",
-      contracts: "45 HD",
-      avatar: "https://images.unsplash.com/photo-1607746882042-944635dfe10e",
-    },
-    {
-      name: "Trần Văn Hùng",
-      role: "Sales Manager",
-      value: "₫756M",
-      contracts: "38 HD",
-      avatar: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1",
-    },
-    {
-      name: "Lê Thị Lan",
-      role: "Consultant",
-      value: "₫645M",
-      contracts: "32 HD",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-    },
-    {
-      name: "Phạm Minh Tuấn",
-      role: "Senior Consultant",
-      value: "₫598M",
-      contracts: "29 HD",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
-    },
-  ];
-
-  const pipelineData = [
-    { stage: "Tiếp cận", customers: 145, value: "₫2.8B", percent: 90, color: "#1890ff" },
-    { stage: "Tư vấn", customers: 89, value: "₫1.9B", percent: 70, color: "#722ed1" },
-    { stage: "Đề xuất", customers: 56, value: "₫1.2B", percent: 50, color: "#faad14" },
-    { stage: "Đàm phán", customers: 34, value: "₫890M", percent: 35, color: "#fa8c16" },
-    { stage: "Chốt đơn", customers: 23, value: "₫650M", percent: 30, color: "#52c41a" },
-  ];
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <Spin size="large" tip="Đang tải dữ liệu...">
+          <div style={{ padding: 50 }} />
+        </Spin>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-modern">
@@ -168,7 +183,7 @@ export default function Dashboard() {
 
       {/* Statistics Cards */}
       <Row gutter={[16, 16]} className="stats-row">
-        {statsData.map((stat, index) => (
+        {statsCards.map((stat, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
             <Card className="stat-card-modern" hoverable>
               <Statistic
@@ -190,7 +205,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <Row gutter={[16, 16]} className="charts-row">
         <Col xs={24} lg={12}>
-          <Card title="Doanh thu 6 tháng gần đây" className="chart-card">
+          <Card title="Doanh thu theo tháng (Triệu VNĐ)" className="chart-card">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={revenueData}>
                 <defs>
@@ -247,39 +262,34 @@ export default function Dashboard() {
         <Col xs={24} lg={14}>
           <Card
             title="Hoạt động gần đây"
-            extra={<a href="#">Xem tất cả</a>}
+            extra={<Button type="link">Xem tất cả</Button>}
             className="activity-card"
           >
-            <List
-              itemLayout="horizontal"
-              dataSource={recentActivities}
-              renderItem={(item) => (
-                <List.Item
-                  extra={
-                    <div className="activity-meta">
-                      <Text strong className="activity-amount">
-                        {item.amount}
-                      </Text>
-                      <Text type="secondary" className="activity-time">
-                        {item.time}
-                      </Text>
-                    </div>
-                  }
-                >
-                  <List.Item.Meta
-                    avatar={
-                      item.avatar ? (
-                        <Avatar src={item.avatar} size={48} />
-                      ) : (
-                        <Avatar icon={<UserOutlined />} size={48} />
-                      )
-                    }
-                    title={<Text strong>{item.name}</Text>}
-                    description={item.action}
-                  />
-                </List.Item>
-              )}
-            />
+            <div className="custom-list">
+              {recentActivities.map((item, index) => (
+                <div key={index} className="custom-list-item" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <div style={{ marginRight: 16 }}>
+                    {item.avatar ? (
+                      <Avatar src={item.avatar} size={48} />
+                    ) : (
+                      <Avatar icon={<UserOutlined />} size={48} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: 'block' }}>{item.name}</Text>
+                    <Text type="secondary">{item.action}</Text>
+                  </div>
+                  <div className="activity-meta" style={{ textAlign: 'right' }}>
+                    <Text strong className="activity-amount" style={{ display: 'block' }}>
+                      {item.amount}
+                    </Text>
+                    <Text type="secondary" className="activity-time">
+                      {item.time}
+                    </Text>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Card>
         </Col>
 
@@ -294,37 +304,32 @@ export default function Dashboard() {
             }
             className="staff-card"
           >
-            <List
-              itemLayout="horizontal"
-              dataSource={topStaff}
-              renderItem={(item, index) => (
-                <List.Item
-                  extra={
-                    <div className="staff-value">
-                      <Text strong>{item.value}</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {item.contracts}
-                      </Text>
-                    </div>
-                  }
-                >
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar
-                        src={item.avatar}
-                        size={44}
-                        style={{
-                          border: index === 0 ? "2px solid #faad14" : "none",
-                        }}
-                      />
-                    }
-                    title={<Text strong>{item.name}</Text>}
-                    description={<Text type="secondary">{item.role}</Text>}
-                  />
-                </List.Item>
-              )}
-            />
+            <div className="custom-list">
+              {topStaff.map((item, index) => (
+                <div key={index} className="custom-list-item" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <div style={{ marginRight: 16 }}>
+                    <Avatar
+                      src={item.avatar}
+                      size={44}
+                      style={{
+                        border: index === 0 ? "2px solid #faad14" : "none",
+                      }}
+                      icon={<UserOutlined />}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: 'block' }}>{item.name}</Text>
+                    <Text type="secondary">{item.role}</Text>
+                  </div>
+                  <div className="staff-value" style={{ textAlign: 'right' }}>
+                    <Text strong style={{ display: 'block' }}>{item.value}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {item.contracts}
+                    </Text>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Card>
         </Col>
       </Row>
@@ -332,7 +337,7 @@ export default function Dashboard() {
       {/* Sales Pipeline */}
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Phiếu bán hàng" extra={<a href="#">Xem chi tiết</a>}>
+          <Card title="Phiếu bán hàng" extra={<Button type="link">Xem chi tiết</Button>}>
             {pipelineData.map((stage, index) => (
               <div key={index} className="pipeline-stage">
                 <div className="stage-header">
@@ -359,5 +364,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-

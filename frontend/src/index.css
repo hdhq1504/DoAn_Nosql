@@ -1,7 +1,5 @@
-/* Import Ant Design CSS */
 @import '~antd/dist/reset.css';
 
-/* Custom CSS Variables */
 :root {
   --primary-color: #1890ff;
   --success-color: #52c41a;
@@ -28,12 +26,10 @@ code {
     monospace;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

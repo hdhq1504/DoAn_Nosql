@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// API Base URL - Backend runs on HTTPS
+// API Base URL - Backend runs on HTTP for development
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:5001/api';
 
 // Create axios instance
@@ -47,13 +47,13 @@ apiClient.interceptors.response.use(
 
 // Customer API
 export const customerAPI = {
-  getAll: () => apiClient.get('/customers'),
-  getById: (id) => apiClient.get(`/customers/${id}`),
-  create: (data) => apiClient.post('/customers', data),
-  update: (id, data) => apiClient.put(`/customers/${id}`, data),
-  delete: (id) => apiClient.delete(`/customers/${id}`),
-  getInteractions: (id) => apiClient.get(`/customers/${id}/interactions`),
-  getJourney: (id) => apiClient.get(`/customers/${id}/journey`),
+  getAll: () => apiClient.get('/customer'),
+  getById: (id) => apiClient.get(`/customer/${id}`),
+  create: (data) => apiClient.post('/customer/create', data),
+  update: (id, data) => apiClient.patch(`/customer/${id}`, data),
+  delete: (id) => apiClient.delete(`/customer/${id}`),
+  getInteractions: (id) => apiClient.get(`/customer/interactions/${id}`),
+  getJourney: (id) => apiClient.get(`/customer/journey/${id}`),
 };
 
 // Product API
@@ -69,9 +69,12 @@ export const productAPI = {
 export const taskAPI = {
   getAll: () => apiClient.get('/tasks'),
   getById: (id) => apiClient.get(`/tasks/${id}`),
-  create: (data) => apiClient.post('/tasks', data),
+  create: (data, employeeId = 'EMP001') => apiClient.post(`/tasks?employeeId=${employeeId}`, data),
   update: (id, data) => apiClient.put(`/tasks/${id}`, data),
   delete: (id) => apiClient.delete(`/tasks/${id}`),
+  getKanban: () => apiClient.get('/tasks/kanban'),
+  updateStatus: (id, status) => apiClient.patch(`/tasks/status/${id}?newStatus=${status}`),
+  reassign: (id, employeeId) => apiClient.patch(`/tasks/reassign/${id}?newEmployeeId=${employeeId}`),
 };
 
 // Campaign API
@@ -86,16 +89,28 @@ export const campaignAPI = {
 // Analytics API
 export const analyticsAPI = {
   getDashboard: () => apiClient.get('/analytics/dashboard'),
-  getReports: () => apiClient.get('/analytics/reports'),
+  getPipeline: () => apiClient.get('/analytics/pipeline'),
+  getCustomerAnalytics: () => apiClient.get('/analytics/customers'),
+  getEmployeePerformance: () => apiClient.get('/analytics/employees'),
+  getMonthlyRevenue: () => apiClient.get('/analytics/revenue'),
 };
 
 // Contract API
 export const contractAPI = {
-  getAll: () => apiClient.get('/contracts'),
-  getById: (id) => apiClient.get(`/contracts/${id}`),
-  create: (data) => apiClient.post('/contracts', data),
-  update: (id, data) => apiClient.put(`/contracts/${id}`, data),
-  delete: (id) => apiClient.delete(`/contracts/${id}`),
+  getAll: () => apiClient.get('/contract'),
+  getById: (id) => apiClient.get(`/contract/${id}`),
+  create: (data) => apiClient.post('/contract', data),
+  update: (id, data) => apiClient.put(`/contract/${id}`, data),
+  delete: (id) => apiClient.delete(`/contract/${id}`),
+};
+
+// Employee API
+export const employeeAPI = {
+  getAll: () => apiClient.get('/employees'),
+  getById: (id) => apiClient.get(`/employees/${id}`),
+  create: (data) => apiClient.post('/employees', data),
+  update: (id, data) => apiClient.put(`/employees/${id}`, data),
+  delete: (id) => apiClient.delete(`/employees/${id}`),
 };
 
 export default apiClient;

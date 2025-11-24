@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
@@ -17,6 +17,8 @@ import {
   Badge,
   Avatar,
   Tooltip,
+  message,
+  Spin
 } from "antd";
 import {
   PlusOutlined,
@@ -28,7 +30,7 @@ import {
   ExclamationCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { mockTasks } from "../../data/mockData";
+import { taskAPI } from "../../services/api";
 import "./Tasks.css";
 import dayjs from "dayjs";
 
@@ -37,10 +39,28 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [form] = Form.useForm();
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await taskAPI.getAll();
+      setTasks(response.data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      message.error("Không thể tải danh sách công việc");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   // Statistics
   const stats = {
@@ -93,8 +113,14 @@ export default function Tasks() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await taskAPI.delete(id);
+      message.success("Đã xóa công việc");
+      fetchTasks();
+    } catch (error) {
+      message.error("Không thể xóa công việc");
+    }
   };
 
   const handleAdd = () => {
@@ -104,29 +130,30 @@ export default function Tasks() {
   };
 
   const handleModalOk = () => {
-    form.validateFields().then((values) => {
-      const formattedValues = {
-        ...values,
-        dueDate: values.dueDate ? values.dueDate.toISOString() : null,
-        createdDate: values.createdDate ? values.createdDate.toISOString() : null,
-      };
-
-      if (editingTask) {
-        setTasks(
-          tasks.map((t) =>
-            t.id === editingTask.id ? { ...t, ...formattedValues } : t
-          )
-        );
-      } else {
-        const newTask = {
-          id: `T${Date.now()}`,
-          ...formattedValues,
+    form.validateFields().then(async (values) => {
+      try {
+        const formattedValues = {
+          ...values,
+          dueDate: values.dueDate ? values.dueDate.toISOString() : null,
+          createdDate: values.createdDate ? values.createdDate.toISOString() : null,
         };
-        setTasks([...tasks, newTask]);
-      }
 
-      setIsModalOpen(false);
-      form.resetFields();
+        if (editingTask) {
+          await taskAPI.update(editingTask.id, formattedValues);
+          message.success("Đã cập nhật công việc");
+        } else {
+          await taskAPI.create({
+            ...formattedValues,
+            id: `TASK${Date.now()}` // Generate ID if backend doesn't
+          });
+          message.success("Đã thêm công việc mới");
+        }
+        setIsModalOpen(false);
+        form.resetFields();
+        fetchTasks();
+      } catch (error) {
+        message.error("Có lỗi xảy ra");
+      }
     });
   };
 
@@ -134,6 +161,16 @@ export default function Tasks() {
     setIsModalOpen(false);
     form.resetFields();
   };
+
+  if (loading) {
+    return (
+      <div className="tasks-loading">
+        <Spin size="large" tip="Đang tải công việc...">
+          <div style={{ height: 200 }} />
+        </Spin>
+      </div>
+    );
+  }
 
   return (
     <div className="tasks-page-modern">
@@ -336,19 +373,15 @@ export default function Tasks() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="id"
-                label="ID"
-                rules={[{ required: true, message: "Vui lòng nhập ID" }]}
-              >
-                <Input disabled={!!editingTask} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
                 name="title"
                 label="Tiêu đề"
                 rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
               >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="type" label="Loại">
                 <Input />
               </Form.Item>
             </Col>
@@ -359,7 +392,7 @@ export default function Tasks() {
           </Form.Item>
 
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item name="status" label="Trạng thái">
                 <Select>
                   <Option value="Pending">Chờ xử lý</Option>
@@ -368,18 +401,13 @@ export default function Tasks() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item name="priority" label="Ưu tiên">
                 <Select>
                   <Option value="Low">Thấp</Option>
                   <Option value="Medium">Trung bình</Option>
                   <Option value="High">Cao</Option>
                 </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="type" label="Loại">
-                <Input />
               </Form.Item>
             </Col>
           </Row>

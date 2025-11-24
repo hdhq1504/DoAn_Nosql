@@ -15,10 +15,11 @@ namespace backend.Controllers
         {
             _service = service;
         }
+
         // ------------------------------------------------------
-        // GET /api/tasks/GetAll
+        // GET /api/tasks
         // ------------------------------------------------------
-        [HttpGet("GetAll")]
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var products = await _service.GetAllTastAsync();
@@ -26,13 +27,18 @@ namespace backend.Controllers
         }
 
         // ------------------------------------------------------
-        // POST /api/tasks/create
+        // POST /api/tasks
         // ------------------------------------------------------
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateTask(string employeeId, [FromBody] backend.Models.Task task)
         {
+            // If employeeId is not provided in query string, try to find a default or return error
+            // For simplicity, we'll require it as a query parameter or default to a known admin ID if needed
+            // But better to keep it required.
             if (string.IsNullOrEmpty(employeeId))
-                return BadRequest(new { message = "employeeId là bắt buộc." });
+                 // Fallback: if not in query, check if it's in the body (though model binding might not map it there easily without DTO)
+                 // For now, let's assume the frontend sends it as a query param ?employeeId=...
+                 return BadRequest(new { message = "employeeId là bắt buộc (query param)." });
 
             if (task == null)
                 return BadRequest(new { message = "Task không được để trống." });
@@ -49,9 +55,31 @@ namespace backend.Controllers
         }
 
         // ------------------------------------------------------
-        // GET /api/tasks/get/kanban
+        // PUT /api/tasks/{id}
         // ------------------------------------------------------
-        [HttpGet("get/kanban")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(string id, [FromBody] backend.Models.Task task)
+        {
+            if (task == null) return BadRequest("Dữ liệu task trống!");
+            var updated = await _service.UpdateTaskAsync(id, task);
+            if (updated == null) return NotFound($"Không tìm thấy task {id}");
+            return Ok(updated);
+        }
+
+        // ------------------------------------------------------
+        // DELETE /api/tasks/{id}
+        // ------------------------------------------------------
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(string id)
+        {
+            bool deleted = await _service.DeleteTaskAsync(id);
+            return Ok(new { message = "Xóa task thành công" });
+        }
+
+        // ------------------------------------------------------
+        // GET /api/tasks/kanban
+        // ------------------------------------------------------
+        [HttpGet("kanban")]
         public async Task<IActionResult> GetKanban()
         {
             var result = await _service.GetKanbanAsync();
@@ -79,10 +107,10 @@ namespace backend.Controllers
         }
 
         // ------------------------------------------------------
-        // GET /api/tasks/{id}/tasks
+        // GET /api/tasks/employee/{id}
         // ------------------------------------------------------
-        [HttpGet("task/{id}")]
-        public async Task<IActionResult> GetTasks(string id)
+        [HttpGet("employee/{id}")]
+        public async Task<IActionResult> GetTasksByEmployee(string id)
         {
             var tasks = await _service.GetTasksByEmployeeAsync(id);
             return Ok(tasks);

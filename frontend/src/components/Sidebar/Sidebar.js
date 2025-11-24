@@ -7,8 +7,7 @@ import {
   CheckSquareOutlined,
   SoundOutlined,
   BarChartOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
 
@@ -25,6 +24,11 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
       key: "customers",
       icon: <UserOutlined />,
       label: "Quản lý Khách hàng",
+    },
+    {
+      key: "employees",
+      icon: <TeamOutlined />,
+      label: "Quản lý Nhân viên",
     },
     {
       key: "products",
@@ -45,7 +49,7 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
       key: "reports",
       icon: <BarChartOutlined />,
       label: "Báo cáo",
-    },
+    }
   ];
 
   return (
