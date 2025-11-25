@@ -9,6 +9,11 @@ namespace backend.Models
         public DateTime endDate { get; set; }
         public double budget { get; set; }
         public string status { get; set; } = "Active"; // Active, Inactive
+        public string description { get; set; } = "";
+        public string criteria { get; set; } = "";
+        public int leads { get; set; }
+        public int conversions { get; set; }
+        public double actualRevenue { get; set; }
     }
 
     public class CampaignRequest
@@ -19,6 +24,11 @@ namespace backend.Models
         public DateOnly endDate { get; set; }
         public double budget { get; set; }
         public string status { get; set; } = "Planning";
+        public string description { get; set; } = "";
+        public string criteria { get; set; } = "";
+        public int leads { get; set; }
+        public int conversions { get; set; }
+        public double actualRevenue { get; set; }
     }
 
     public class TargetCustomer

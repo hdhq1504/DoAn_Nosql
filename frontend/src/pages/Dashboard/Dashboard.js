@@ -29,16 +29,16 @@ const { Title, Text } = Typography;
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    totalCustomers: 0,
     totalRevenue: 0,
     totalTasks: 0,
-    totalEmployees: 0
+    totalEmployees: 0,
+    activeCampaigns: 0,
+    totalLeads: 0
   });
   const [revenueData, setRevenueData] = useState([]);
   const [pipelineData, setPipelineData] = useState([]);
   const [topStaff, setTopStaff] = useState([]);
 
-  // Mock data for missing APIs
   const [recentActivities] = useState([
     {
       name: "Nguyễn Văn An",
@@ -88,8 +88,8 @@ export default function Dashboard() {
         // Format Revenue Data
         const formattedRevenue = revenueRes.data.map(item => ({
           month: `T${item.month}`,
-          revenue: item.totalRevenue / 1000000, // Convert to Millions
-          target: (item.totalRevenue * 1.1) / 1000000 // Mock target
+          revenue: item.totalRevenue / 1000000,
+          target: (item.totalRevenue * 1.1) / 1000000
         }));
         setRevenueData(formattedRevenue);
 
@@ -99,7 +99,7 @@ export default function Dashboard() {
           stage: item.stage,
           customers: item.dealCount,
           value: `₫${(item.totalValue / 1000000).toFixed(0)}M`,
-          percent: Math.min(100, item.dealCount * 10), // Mock percent logic
+          percent: Math.min(100, item.dealCount * 10),
           color: colors[index % colors.length]
         }));
         setPipelineData(formattedPipeline);
@@ -136,7 +136,7 @@ export default function Dashboard() {
       suffix: <ArrowUpOutlined style={{ color: "#52c41a", fontSize: 12 }} />,
       valueStyle: { color: "#1890ff" },
       precision: 0,
-      growth: "+12%", // Mock growth
+      growth: "+12%",
     },
     {
       title: "Doanh thu tổng",
@@ -145,7 +145,7 @@ export default function Dashboard() {
       suffix: "₫",
       valueStyle: { color: "#52c41a" },
       precision: 0,
-      growth: "+8%", // Mock growth
+      growth: "+8%",
     },
     {
       title: "Nhân viên",
@@ -153,7 +153,7 @@ export default function Dashboard() {
       prefix: <FileTextOutlined />,
       valueStyle: { color: "#722ed1" },
       precision: 0,
-      growth: "+23%", // Mock growth
+      growth: "+23%",
     },
     {
       title: "Tổng công việc",
@@ -161,7 +161,23 @@ export default function Dashboard() {
       prefix: <CheckCircleOutlined />,
       valueStyle: { color: "#fa8c16" },
       precision: 0,
-      growth: "+5%", // Mock growth
+      growth: "+5%",
+    },
+    {
+      title: "Chiến dịch đang chạy",
+      value: stats.activeCampaigns,
+      prefix: <TrophyOutlined />,
+      valueStyle: { color: "#eb2f96" },
+      precision: 0,
+      growth: "Active",
+    },
+    {
+      title: "Tổng Leads",
+      value: stats.totalLeads,
+      prefix: <UserOutlined />,
+      valueStyle: { color: "#fa541c" },
+      precision: 0,
+      growth: "New",
     },
   ];
 
@@ -184,7 +200,7 @@ export default function Dashboard() {
       {/* Statistics Cards */}
       <Row gutter={[16, 16]} className="stats-row">
         {statsCards.map((stat, index) => (
-          <Col xs={24} sm={12} lg={6} key={index}>
+          <Col xs={24} sm={12} lg={4} key={index}>
             <Card className="stat-card-modern" hoverable>
               <Statistic
                 title={stat.title}

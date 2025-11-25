@@ -222,9 +222,9 @@ export default function Products() {
                 style={{ width: 150 }}
               >
                 <Option value="all">Tất cả loại</Option>
-                <Option value="Software">Phần mềm</Option>
-                <Option value="Service">Dịch vụ</Option>
-                <Option value="Cloud">Cloud</Option>
+                <Option value="Bảo hiểm">Bảo hiểm</Option>
+                <Option value="Đầu tư">Đầu tư</Option>
+                <Option value="Tư vấn">Tư vấn</Option>
               </Select>
               <Select
                 value={filterStatus}
@@ -360,9 +360,9 @@ export default function Products() {
             <Col span={12}>
               <Form.Item name="category" label="Loại sản phẩm">
                 <Select>
-                  <Option value="Software">Phần mềm</Option>
-                  <Option value="Service">Dịch vụ</Option>
-                  <Option value="Cloud">Cloud</Option>
+                  <Option value="Bảo hiểm">Bảo hiểm</Option>
+                  <Option value="Đầu tư">Đầu tư</Option>
+                  <Option value="Tư vấn">Tư vấn</Option>
                 </Select>
               </Form.Item>
             </Col>

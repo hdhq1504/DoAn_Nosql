@@ -32,8 +32,10 @@ import {
   DeleteOutlined,
   SearchOutlined,
   PlusOutlined,
+  FileTextOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
-import { customerAPI } from "../../services/api";
+import { customerAPI, contractAPI } from "../../services/api";
 import "./Customers.css";
 import dayjs from "dayjs";
 
@@ -45,10 +47,13 @@ const detailInitialState = {
   isDrawerOpen: false,
   detailLoadingId: null,
   interactions: [],
+  contracts: [],
   journey: [],
   interactionsLoading: false,
+  contractsLoading: false,
   journeyLoading: false,
   interactionsError: null,
+  contractsError: null,
   journeyError: null,
   interactionType: "all",
   interactionDateRange: null,
@@ -79,6 +84,12 @@ function detailReducer(state, action) {
         interactionsLoading: false,
         interactionsError: action.error,
       };
+    case "SET_CONTRACTS_LOADING":
+      return { ...state, contractsLoading: true, contractsError: null };
+    case "SET_CONTRACTS_SUCCESS":
+      return { ...state, contractsLoading: false, contracts: action.data };
+    case "SET_CONTRACTS_ERROR":
+      return { ...state, contractsLoading: false, contractsError: action.error };
     case "SET_JOURNEY_LOADING":
       return { ...state, journeyLoading: true, journeyError: null };
     case "SET_JOURNEY_SUCCESS":
@@ -108,6 +119,8 @@ export default function Customers() {
   );
   const [searchText, setSearchText] = useState("");
   const [filterSegment, setFilterSegment] = useState("all");
+  const [filterRegion, setFilterRegion] = useState("all");
+  const [filterPotential, setFilterPotential] = useState("all");
   const [form] = Form.useForm();
 
   const {
@@ -115,10 +128,13 @@ export default function Customers() {
     isDrawerOpen,
     detailLoadingId,
     interactions,
+    contracts,
     journey,
     interactionsLoading,
+    contractsLoading,
     journeyLoading,
     interactionsError,
+    contractsError,
     journeyError,
     interactionType,
     interactionDateRange,
@@ -148,9 +164,9 @@ export default function Customers() {
   const stats = {
     total: customers.length,
     vip: customers.filter((c) => c.segment === "VIP").length,
-    business: customers.filter((c) => c.segment === "Doanh nhân").length,
+    business: customers.filter((c) => c.segment === "Doanh nghiệp").length,
     new: customers.filter((c) => {
-      const created = new Date(c.createdDate);
+      const created = new Date(c.createddate);
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       return created > monthAgo;
@@ -167,7 +183,13 @@ export default function Customers() {
     const matchesSegment =
       filterSegment === "all" || customer.segment === filterSegment;
 
-    return matchesSearch && matchesSegment;
+    const matchesRegion =
+      filterRegion === "all" || (customer.address && customer.address.includes(filterRegion));
+
+    const matchesPotential =
+      filterPotential === "all" || (filterPotential === "High" ? customer.lifetimevalue > 10000000 : customer.lifetimevalue <= 10000000);
+
+    return matchesSearch && matchesSegment && matchesRegion && matchesPotential;
   });
 
   const interactionTypes = [
@@ -228,6 +250,11 @@ export default function Customers() {
       dataIndex: "type",
       key: "type",
       width: 120,
+      filters: [
+        { text: "Cá nhân", value: "Cá nhân" },
+        { text: "Doanh nghiệp", value: "Doanh nghiệp" },
+      ],
+      onFilter: (value, record) => record.type === value,
     },
     {
       title: "Phân khúc",
@@ -237,13 +264,13 @@ export default function Customers() {
       render: (segment) => {
         let color = "blue";
         if (segment === "VIP") color = "purple";
-        else if (segment === "Doanh nhân") color = "green";
+        else if (segment === "Doanh nghiệp") color = "green";
         return <Tag color={color}>{segment}</Tag>;
       },
       filters: [
         { text: "VIP", value: "VIP" },
-        { text: "Doanh nhân", value: "Doanh nhân" },
-        { text: "Thành viên", value: "Thành viên" },
+        { text: "Doanh nghiệp", value: "Doanh nghiệp" },
+        { text: "Thường", value: "Thường" },
       ],
       onFilter: (value, record) => record.segment === value,
     },
@@ -263,12 +290,12 @@ export default function Customers() {
     },
     {
       title: "Giá trị",
-      dataIndex: "lifetimeValue",
-      key: "lifetimeValue",
+      dataIndex: "lifetimevalue",
+      key: "lifetimevalue",
       width: 130,
       align: "right",
       render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
-      sorter: (a, b) => (a.lifetimeValue || 0) - (b.lifetimeValue || 0),
+      sorter: (a, b) => (a.lifetimevalue || 0) - (b.lifetimevalue || 0),
     },
     {
       title: "Đánh giá",
@@ -282,13 +309,13 @@ export default function Customers() {
     },
     {
       title: "Ngày tạo",
-      dataIndex: "createdDate",
-      key: "createdDate",
+      dataIndex: "createddate",
+      key: "createddate",
       width: 120,
       render: (date) =>
         date ? dayjs(date).format("DD/MM/YYYY") : "-",
       sorter: (a, b) =>
-        new Date(a.createdDate || 0) - new Date(b.createdDate || 0),
+        new Date(a.createddate || 0) - new Date(b.createddate || 0),
     },
     {
       title: "Hành động",
@@ -339,8 +366,8 @@ export default function Customers() {
     setEditingCustomer(customer);
     form.setFieldsValue({
       ...customer,
-      createdDate: customer.createdDate ? dayjs(customer.createdDate) : null,
-      lastContact: customer.lastContact ? dayjs(customer.lastContact) : null,
+      createddate: customer.createddate ? dayjs(customer.createddate) : null,
+      lastcontact: customer.lastcontact ? dayjs(customer.lastcontact) : null,
     });
     setIsModalOpen(true);
   };
@@ -373,6 +400,23 @@ export default function Customers() {
     }
   };
 
+  const fetchContracts = async (customerId) => {
+    try {
+      dispatchDetail({ type: "SET_CONTRACTS_LOADING" });
+      const response = await contractAPI.getAll({ customerId });
+      dispatchDetail({
+        type: "SET_CONTRACTS_SUCCESS",
+        data: response.data || [],
+      });
+    } catch (err) {
+      console.error("Error fetching contracts:", err);
+      dispatchDetail({
+        type: "SET_CONTRACTS_ERROR",
+        error: "Không thể tải lịch sử hợp đồng",
+      });
+    }
+  };
+
   const fetchJourney = async (customerId) => {
     try {
       dispatchDetail({ type: "SET_JOURNEY_LOADING" });
@@ -392,7 +436,11 @@ export default function Customers() {
 
   const handleViewDetails = async (customer) => {
     dispatchDetail({ type: "OPEN_DRAWER", customer });
-    await Promise.all([fetchInteractions(customer.id), fetchJourney(customer.id)]);
+    await Promise.all([
+      fetchInteractions(customer.id),
+      fetchContracts(customer.id),
+      fetchJourney(customer.id)
+    ]);
     dispatchDetail({ type: "FINISH_DETAIL_LOADING" });
   };
 
@@ -407,11 +455,11 @@ export default function Customers() {
       const values = await form.validateFields();
       const formattedValues = {
         ...values,
-        createdDate: values.createdDate
-          ? values.createdDate.toISOString()
+        createddate: values.createddate
+          ? values.createddate.toISOString()
           : new Date().toISOString(),
-        lastContact: values.lastContact
-          ? values.lastContact.toISOString()
+        lastcontact: values.lastcontact
+          ? values.lastcontact.toISOString()
           : new Date().toISOString(),
       };
 
@@ -526,8 +574,8 @@ export default function Customers() {
             >
               <Option value="all">Tất cả phân khúc</Option>
               <Option value="VIP">VIP</Option>
-              <Option value="Doanh nhân">Doanh nhân</Option>
-              <Option value="Thành viên">Thành viên</Option>
+              <Option value="Doanh nghiệp">Doanh nghiệp</Option>
+              <Option value="Thường">Thường</Option>
             </Select>
           </Col>
           <Col xs={24} md={8} style={{ textAlign: "right" }}>
@@ -539,6 +587,33 @@ export default function Customers() {
             >
               Thêm khách hàng
             </Button>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
+          <Col xs={24} md={8}>
+            <Select
+              value={filterRegion}
+              onChange={setFilterRegion}
+              style={{ width: "100%" }}
+              placeholder="Lọc theo khu vực"
+            >
+              <Option value="all">Tất cả khu vực</Option>
+              <Option value="Hà Nội">Hà Nội</Option>
+              <Option value="Hồ Chí Minh">Hồ Chí Minh</Option>
+              <Option value="Đà Nẵng">Đà Nẵng</Option>
+            </Select>
+          </Col>
+          <Col xs={24} md={8}>
+            <Select
+              value={filterPotential}
+              onChange={setFilterPotential}
+              style={{ width: "100%" }}
+              placeholder="Mức độ tiềm năng"
+            >
+              <Option value="all">Tất cả mức độ</Option>
+              <Option value="High">Tiềm năng cao ({">"} 10tr)</Option>
+              <Option value="Low">Tiềm năng thấp ({"<="} 10tr)</Option>
+            </Select>
           </Col>
         </Row>
       </Card>
@@ -567,7 +642,7 @@ export default function Customers() {
                     <Tag>{selectedCustomer.type}</Tag>
                   </Space>
                   <div style={{ color: "#8c8c8c", marginTop: 4 }}>
-                    Ngày tạo: {selectedCustomer.createdDate ? dayjs(selectedCustomer.createdDate).format("DD/MM/YYYY") : "-"}
+                    Ngày tạo: {selectedCustomer.createddate ? dayjs(selectedCustomer.createddate).format("DD/MM/YYYY") : "-"}
                   </div>
                 </Card>
               </Col>
@@ -649,6 +724,60 @@ export default function Customers() {
                   ),
                 },
                 {
+                  key: "contracts",
+                  label: "Lịch sử hợp đồng",
+                  icon: <FileTextOutlined />,
+                  children: (
+                    <>
+                      {contractsError && (
+                        <Alert
+                          message="Lỗi"
+                          description={contractsError}
+                          type="error"
+                          showIcon
+                          style={{ marginBottom: 12 }}
+                        />
+                      )}
+                      <Spin spinning={contractsLoading}>
+                        {contracts.length === 0 ? (
+                          <Alert message="Chưa có hợp đồng nào" type="info" showIcon />
+                        ) : (
+                          <Table
+                            dataSource={contracts}
+                            rowKey="id"
+                            pagination={false}
+                            columns={[
+                              { title: "Mã HĐ", dataIndex: "id", key: "id" },
+                              {
+                                title: "Ngày mua",
+                                dataIndex: "purchaseDate",
+                                key: "purchaseDate",
+                                render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-"
+                              },
+                              {
+                                title: "Giá trị",
+                                dataIndex: "contractValue",
+                                key: "contractValue",
+                                render: (val) => `₫${Number(val).toLocaleString("vi-VN")}`
+                              },
+                              {
+                                title: "Trạng thái",
+                                dataIndex: "status",
+                                key: "status",
+                                render: (status) => (
+                                  <Tag color={status === "Active" ? "success" : "default"}>
+                                    {status === "Active" ? "Hiệu lực" : status}
+                                  </Tag>
+                                )
+                              }
+                            ]}
+                          />
+                        )}
+                      </Spin>
+                    </>
+                  ),
+                },
+                {
                   key: "journey",
                   label: "Hành trình khách hàng",
                   children: (
@@ -687,6 +816,7 @@ export default function Customers() {
                                   )}
                                 </div>
                               ),
+                              icon: step.status === "Completed" ? <CheckCircleOutlined /> : null
                             }))}
                           />
                         )}
@@ -697,7 +827,8 @@ export default function Customers() {
               ]}
             />
           </>
-        )}
+        )
+        }
       </Drawer>
 
       {/* Table */}
@@ -777,6 +908,19 @@ export default function Customers() {
 
           <Row gutter={16}>
             <Col span={12}>
+              <Form.Item name="company" label="Công ty">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="address" label="Địa chỉ">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
               <Form.Item name="type" label="Loại khách hàng">
                 <Select>
                   <Option value="Cá nhân">Cá nhân</Option>
@@ -788,24 +932,33 @@ export default function Customers() {
               <Form.Item name="segment" label="Phân khúc">
                 <Select>
                   <Option value="VIP">VIP</Option>
-                  <Option value="Doanh nhân">Doanh nhân</Option>
-                  <Option value="Thành viên">Thành viên</Option>
+                  <Option value="Doanh nghiệp">Doanh nghiệp</Option>
+                  <Option value="Thường">Thường</Option>
                 </Select>
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="company" label="Công ty">
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="address" label="Địa chỉ">
-            <Input.TextArea rows={2} />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="status" label="Trạng thái">
+                <Select>
+                  <Option value="Active">Hoạt động</Option>
+                  <Option value="Inactive">Ngừng hoạt động</Option>
+                  <Option value="Potential">Tiềm năng</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="createddate" label="Ngày tạo">
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="lifetimeValue" label="Giá trị (₫)">
+              <Form.Item name="lifetimevalue" label="Giá trị (₫)">
                 <Input type="number" />
               </Form.Item>
             </Col>
@@ -818,23 +971,11 @@ export default function Customers() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="createdDate" label="Ngày tạo">
-                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="lastContact" label="Liên hệ cuối">
+              <Form.Item name="lastcontact" label="Liên hệ cuối">
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
           </Row>
-
-          <Form.Item name="status" label="Trạng thái">
-            <Select>
-              <Option value="Active">Active</Option>
-              <Option value="Inactive">Inactive</Option>
-            </Select>
-          </Form.Item>
         </Form>
       </Modal>
     </div>

@@ -1,262 +1,181 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Table,
-  Button,
+  Tabs,
   Card,
+  Table,
   Row,
   Col,
-  Statistic,
   Typography,
-  Tag,
-  Progress,
+  Spin,
+  message,
+  Statistic,
+  Progress
 } from "antd";
 import {
-  DownloadOutlined,
-  TrophyOutlined,
-  TeamOutlined,
-  RiseOutlined,
-} from "@ant-design/icons";
-import { mockReports } from "../../data/mockData";
-import "./Reports.css";
-import * as XLSX from "xlsx";
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { analyticsAPI } from "../../services/api";
+import { UsergroupAddOutlined, TeamOutlined, DollarOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 export default function Reports() {
-  const [reports] = useState(mockReports);
+  const [loading, setLoading] = useState(true);
+  const [customerData, setCustomerData] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
+  const [revenueData, setRevenueData] = useState([]);
 
-  // Statistics
-  const stats = {
-    totalEmployees: reports.length,
-    avgKPI: Math.round(
-      reports.reduce((sum, r) => sum + r.kpi, 0) / reports.length
-    ),
-    topPerformers: reports.filter((r) => r.kpi >= 100).length,
-    totalRevenue: reports.reduce((sum, r) => sum + (r.revenue || 0), 0),
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [customerRes, employeeRes, revenueRes] = await Promise.all([
+          analyticsAPI.getCustomerAnalytics(),
+          analyticsAPI.getEmployeePerformance(),
+          analyticsAPI.getMonthlyRevenue()
+        ]);
 
-  const getKPIColor = (kpi) => {
-    if (kpi >= 100) return "#52c41a";
-    if (kpi >= 90) return "#1890ff";
-    if (kpi >= 80) return "#13c2c2";
-    if (kpi >= 70) return "#faad14";
-    if (kpi >= 60) return "#fa8c16";
-    return "#ff4d4f";
-  };
+        setCustomerData(customerRes.data);
+        setEmployeeData(employeeRes.data);
+        setRevenueData(revenueRes.data);
+      } catch (error) {
+        console.error("Error fetching report data:", error);
+        message.error("Không thể tải dữ liệu báo cáo");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getKPITag = (kpi) => {
-    let color = "default";
-    if (kpi >= 100) color = "success";
-    else if (kpi >= 90) color = "processing";
-    else if (kpi >= 70) color = "warning";
-    else color = "error";
+    fetchData();
+  }, []);
 
-    return <Tag color={color}>{kpi}%</Tag>;
-  };
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: 50 }}>
+        <Spin size="large" tip="Đang tải báo cáo..." />
+      </div>
+    );
+  }
 
-  const columns = [
-    {
-      title: "Tên nhân viên",
-      dataIndex: "employeeName",
-      key: "employeeName",
-      width: 180,
-      fixed: "left",
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Phòng ban",
-      dataIndex: "department",
-      key: "department",
-      width: 150,
-    },
-    {
-      title: "Hợp đồng",
-      dataIndex: "contract",
-      key: "contract",
-      width: 100,
-      align: "center",
-      sorter: (a, b) => a.contract - b.contract,
-    },
-    {
-      title: "Doanh thu",
-      dataIndex: "revenue",
-      key: "revenue",
-      width: 150,
-      align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
-      sorter: (a, b) => (a.revenue || 0) - (b.revenue || 0),
-    },
-    {
-      title: "Khách hàng",
-      dataIndex: "customer",
-      key: "customer",
-      width: 120,
-      align: "center",
-      sorter: (a, b) => a.customer - b.customer,
-    },
-    {
-      title: "KPI (%)",
-      dataIndex: "kpi",
-      key: "kpi",
-      width: 100,
-      align: "center",
-      render: (kpi) => getKPITag(kpi),
-      sorter: (a, b) => a.kpi - b.kpi,
-      defaultSortOrder: "descend",
-    },
-    {
-      title: "Tiến độ",
-      key: "progress",
-      width: 150,
-      render: (_, record) => (
-        <Progress
-          percent={record.kpi}
-          size="small"
-          strokeColor={getKPIColor(record.kpi)}
-          showInfo={false}
-        />
-      ),
-    },
-    {
-      title: "Đánh giá",
-      dataIndex: "evaluation",
-      key: "evaluation",
-      width: 120,
-      filters: [
-        { text: "Xuất sắc", value: "Xuất sắc" },
-        { text: "Tốt", value: "Tốt" },
-        { text: "Trung bình", value: "Trung bình" },
-      ],
-      onFilter: (value, record) => record.evaluation === value,
-    },
+  const customerColumns = [
+    { title: "Phân khúc", dataIndex: "segment", key: "segment" },
+    { title: "Số lượng KH", dataIndex: "customerCount", key: "customerCount", sorter: (a, b) => a.customerCount - b.customerCount },
+    { title: "Giá trị TB (LTV)", dataIndex: "averageLTV", key: "averageLTV", render: (val) => `₫${val.toLocaleString()}` },
+    { title: "Điểm hài lòng", dataIndex: "averageSatisfaction", key: "averageSatisfaction", render: (val) => <Progress percent={val * 10} steps={5} size="small" strokeColor="#52c41a" /> },
+    { title: "Tương tác TB", dataIndex: "averageInteractions", key: "averageInteractions" },
   ];
 
-  const handleDownloadAll = () => {
-    const wb = XLSX.utils.book_new();
-    const wsData = [
-      [
-        "Tên nhân viên",
-        "Phòng ban",
-        "Hợp đồng",
-        "Doanh thu",
-        "Khách hàng",
-        "KPI (%)",
-        "Đánh giá",
-      ],
-      ...reports.map((r) => [
-        r.employeeName,
-        r.department,
-        r.contract,
-        r.revenue,
-        r.customer,
-        r.kpi,
-        r.evaluation,
-      ]),
-    ];
+  const employeeColumns = [
+    { title: "Nhân viên", dataIndex: "employeeName", key: "employeeName" },
+    { title: "Khách hàng", dataIndex: "totalCustomers", key: "totalCustomers", sorter: (a, b) => a.totalCustomers - b.totalCustomers },
+    { title: "Tasks hoàn thành", dataIndex: "completedTasks", key: "completedTasks", sorter: (a, b) => a.completedTasks - b.completedTasks },
+    { title: "Doanh thu", dataIndex: "totalRevenue", key: "totalRevenue", render: (val) => `₫${val.toLocaleString()}`, sorter: (a, b) => a.totalRevenue - b.totalRevenue },
+    { title: "Hoa hồng", dataIndex: "totalCommission", key: "totalCommission", render: (val) => `₫${val.toLocaleString()}` },
+    { title: "Hiệu suất", dataIndex: "performanceScore", key: "performanceScore", render: (val) => <Progress percent={val} size="small" /> },
+  ];
 
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Set column widths
-    ws["!cols"] = [
-      { wch: 20 },
-      { wch: 15 },
-      { wch: 10 },
-      { wch: 15 },
-      { wch: 12 },
-      { wch: 10 },
-      { wch: 15 },
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, "Báo cáo KPI");
-    XLSX.writeFile(wb, "Bao_cao_KPI.xlsx");
-  };
-
-  const formatMoney = (value) => Number(value || 0).toLocaleString("vi-VN");
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   return (
-    <div className="reports-page-modern">
-      <Title level={2}>Báo cáo KPI</Title>
+    <div style={{ padding: 24 }}>
+      <Title level={2}>Báo cáo & Phân tích</Title>
 
-      {/* Statistics */}
-      <Row gutter={[16, 16]} className="stats-row">
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng nhân viên"
-              value={stats.totalEmployees}
-              prefix={<TeamOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="KPI trung bình"
-              value={stats.avgKPI}
-              suffix="%"
-              prefix={<RiseOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Xuất sắc (≥100%)"
-              value={stats.topPerformers}
-              prefix={<TrophyOutlined />}
-              valueStyle={{ color: "#faad14" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng doanh thu"
-              value={formatMoney(stats.totalRevenue)}
-              prefix="₫"
-              valueStyle={{ color: "#722ed1" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Toolbar */}
-      <Card className="toolbar-card">
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={4} style={{ margin: 0 }}>
-              Danh sách báo cáo
-            </Title>
-          </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={handleDownloadAll}
-              size="large"
-            >
-              Xuất báo cáo Excel
-            </Button>
-          </Col>
-        </Row>
-      </Card>
-
-      {/* Table */}
-      <Card className="table-card">
-        <Table
-          columns={columns}
-          dataSource={reports}
-          rowKey="id"
-          scroll={{ x: 1200 }}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng số ${total} nhân viên`,
-          }}
-        />
-      </Card>
+      <Tabs defaultActiveKey="1" items={[
+        {
+          key: "1",
+          label: <span><UsergroupAddOutlined /> Phân tích Khách hàng</span>,
+          children: (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} lg={12}>
+                <Card title="Phân bố khách hàng theo phân khúc">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={customerData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="customerCount"
+                        nameKey="segment"
+                        label
+                      >
+                        {customerData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card>
+              </Col>
+              <Col xs={24} lg={12}>
+                <Card title="Chi tiết phân khúc">
+                  <Table dataSource={customerData} columns={customerColumns} rowKey="segment" pagination={false} />
+                </Card>
+              </Col>
+            </Row>
+          )
+        },
+        {
+          key: "2",
+          label: <span><TeamOutlined /> Hiệu suất Nhân viên</span>,
+          children: (
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Card title="Bảng xếp hạng nhân viên">
+                  <Table dataSource={employeeData} columns={employeeColumns} rowKey="employeeId" />
+                </Card>
+              </Col>
+              <Col span={24}>
+                <Card title="Biểu đồ doanh thu nhân viên">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={employeeData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="employeeName" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `₫${value.toLocaleString()}`} />
+                      <Legend />
+                      <Bar dataKey="totalRevenue" fill="#1890ff" name="Doanh thu" />
+                      <Bar dataKey="totalCommission" fill="#52c41a" name="Hoa hồng" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Card>
+              </Col>
+            </Row>
+          )
+        },
+        {
+          key: "3",
+          label: <span><DollarOutlined /> Báo cáo Doanh thu</span>,
+          children: (
+            <Card title="Xu hướng doanh thu">
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={revenueData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" tickFormatter={(val) => `Tháng ${val}`} />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₫${value.toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="totalRevenue" fill="#1890ff" name="Doanh thu" />
+                  <Bar dataKey="totalCommission" fill="#faad14" name="Hoa hồng" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          )
+        }
+      ]} />
     </div>
   );
 }

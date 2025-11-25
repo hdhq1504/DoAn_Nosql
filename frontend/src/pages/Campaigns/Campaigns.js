@@ -27,8 +27,10 @@ import {
   PauseCircleOutlined,
   CheckCircleOutlined,
   DollarOutlined,
+  UsergroupAddOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
-import { campaignAPI } from "../../services/api";
+import { campaignAPI, customerAPI } from "../../services/api";
 import "./Campaigns.css";
 import dayjs from "dayjs";
 
@@ -40,16 +42,22 @@ export default function Campaigns() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
   const [form] = Form.useForm();
 
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const response = await campaignAPI.getAll();
-      setCampaigns(response.data);
+      const [campaignsRes, customersRes] = await Promise.all([
+        campaignAPI.getAll(),
+        customerAPI.getAll(),
+      ]);
+      setCampaigns(campaignsRes.data);
+      setCustomers(customersRes.data);
     } catch (error) {
-      console.error("Error fetching campaigns:", error);
-      message.error("Không thể tải danh sách chiến dịch");
+      console.error("Error fetching data:", error);
+      message.error("Không thể tải dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -177,6 +185,15 @@ export default function Campaigns() {
       sorter: (a, b) => (a.conversions || 0) - (b.conversions || 0),
     },
     {
+      title: "Doanh thu",
+      dataIndex: "actualRevenue",
+      key: "actualRevenue",
+      width: 130,
+      align: "right",
+      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      sorter: (a, b) => (a.actualRevenue || 0) - (b.actualRevenue || 0),
+    },
+    {
       title: "Hành động",
       key: "action",
       width: 120,
@@ -203,13 +220,22 @@ export default function Campaigns() {
     },
   ];
 
-  const handleEdit = (campaign) => {
+  const handleEdit = async (campaign) => {
     setEditingCampaign(campaign);
     form.setFieldsValue({
       ...campaign,
       startDate: campaign.startDate ? dayjs(campaign.startDate) : null,
       endDate: campaign.endDate ? dayjs(campaign.endDate) : null,
     });
+
+    // Fetch target customers
+    try {
+      const res = await campaignAPI.getTargetCustomers(campaign.id);
+      setSelectedCustomerIds(res.data.map(c => c.id));
+    } catch (error) {
+      setSelectedCustomerIds([]);
+    }
+
     setIsModalOpen(true);
   };
 
@@ -225,6 +251,7 @@ export default function Campaigns() {
 
   const handleAdd = () => {
     setEditingCampaign(null);
+    setSelectedCustomerIds([]);
     form.resetFields();
     setIsModalOpen(true);
   };
@@ -238,16 +265,25 @@ export default function Campaigns() {
           endDate: values.endDate ? values.endDate.toISOString() : null,
         };
 
+        let campaignId = editingCampaign?.id;
+
         if (editingCampaign) {
           await campaignAPI.update(editingCampaign.id, formattedValues);
           message.success("Đã cập nhật chiến dịch");
         } else {
-          await campaignAPI.create({
+          const res = await campaignAPI.create({
             ...formattedValues,
-            id: `CAM${Date.now()}` // Generate ID if backend doesn't
+            id: `CAM${Date.now()}`
           });
+          campaignId = res.data.id;
           message.success("Đã thêm chiến dịch mới");
         }
+
+        // Assign customers
+        if (selectedCustomerIds.length > 0 && campaignId) {
+          await campaignAPI.assignCustomers(campaignId, selectedCustomerIds);
+        }
+
         setIsModalOpen(false);
         form.resetFields();
         fetchCampaigns();
@@ -275,11 +311,11 @@ export default function Campaigns() {
   }
 
   return (
-    <div className="campaigns-page-modern">
+    <div className="campaigns-page-modern" >
       <Title level={2}>Quản lý Chiến dịch</Title>
 
       {/* Statistics */}
-      <Row gutter={[16, 16]} className="stats-row">
+      <Row gutter={[16, 16]} className="stats-row" >
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
@@ -322,10 +358,10 @@ export default function Campaigns() {
             />
           </Card>
         </Col>
-      </Row>
+      </Row >
 
       {/* Toolbar */}
-      <Card className="toolbar-card">
+      < Card className="toolbar-card" >
         <Row justify="space-between" align="middle">
           <Col>
             <Title level={4} style={{ margin: 0 }}>
@@ -343,10 +379,10 @@ export default function Campaigns() {
             </Button>
           </Col>
         </Row>
-      </Card>
+      </Card >
 
       {/* Table */}
-      <Card className="table-card">
+      < Card className="table-card" >
         <Table
           columns={columns}
           dataSource={campaigns}
@@ -358,10 +394,10 @@ export default function Campaigns() {
             showTotal: (total) => `Tổng số ${total} chiến dịch`,
           }}
         />
-      </Card>
+      </Card >
 
       {/* Modal */}
-      <Modal
+      < Modal
         title={editingCampaign ? "Chỉnh sửa chiến dịch" : "Thêm chiến dịch mới"}
         open={isModalOpen}
         onOk={handleModalOk}
@@ -455,8 +491,52 @@ export default function Campaigns() {
               </Form.Item>
             </Col>
           </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="description" label="Mô tả">
+                <Input.TextArea rows={3} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div style={{ marginTop: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Title level={5} style={{ margin: 0 }}><UsergroupAddOutlined /> Khách hàng mục tiêu</Title>
+              <Tag color="blue">{selectedCustomerIds.length} đã chọn</Tag>
+            </div>
+
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="Chọn khách hàng mục tiêu"
+              value={selectedCustomerIds}
+              onChange={setSelectedCustomerIds}
+              optionFilterProp="children"
+              filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+              options={customers.map(c => ({
+                label: `${c.name} (${c.segment || 'Thường'}) - ${c.region || 'N/A'}`,
+                value: c.id
+              }))}
+            />
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <Title level={5}><TrophyOutlined /> Hiệu quả chiến dịch</Title>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item name="actualRevenue" label="Doanh thu thực tế (₫)">
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
         </Form>
-      </Modal>
-    </div>
+      </Modal >
+    </div >
   );
 }

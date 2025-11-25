@@ -1,5 +1,7 @@
 using backend.Service;
+using backend.Services;
 using Microsoft.OpenApi.Models;
+using Neo4j.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,13 @@ builder.Services.AddCors(options =>
 // Thêm services
 builder.Services.AddControllers();
 
+// Cấu hình Neo4j Driver
+var configUrl = builder.Configuration["Neo4j:Url"];
+var neo4jUrl = (configUrl != null && configUrl.StartsWith("http")) ? "bolt://localhost:7687" : (configUrl ?? "bolt://localhost:7687");
+var neo4jUser = builder.Configuration["Neo4j:Username"] ?? "neo4j";
+var neo4jPassword = builder.Configuration["Neo4j:Password"] ?? "12345678";
+builder.Services.AddSingleton(GraphDatabase.Driver(neo4jUrl, AuthTokens.Basic(neo4jUser, neo4jPassword)));
+
 // Đăng ký CustomerService
 builder.Services.AddSingleton<CustomerService>();
 builder.Services.AddScoped<ProductService>();
@@ -40,6 +49,7 @@ builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddScoped<AuthService>();
 
 
 // Cấu hình Swagger

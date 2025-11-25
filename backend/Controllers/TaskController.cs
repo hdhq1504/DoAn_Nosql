@@ -20,7 +20,7 @@ namespace backend.Controllers
         // GET /api/tasks
         // ------------------------------------------------------
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async System.Threading.Tasks.Task<IActionResult> GetAll()
         {
             var products = await _service.GetAllTastAsync();
             return Ok(products);
@@ -30,7 +30,7 @@ namespace backend.Controllers
         // POST /api/tasks
         // ------------------------------------------------------
         [HttpPost]
-        public async Task<IActionResult> CreateTask(string employeeId, [FromBody] backend.Models.Task task)
+        public async System.Threading.Tasks.Task<IActionResult> CreateTask(string employeeId, [FromBody] backend.Models.Task task)
         {
             // If employeeId is not provided in query string, try to find a default or return error
             // For simplicity, we'll require it as a query parameter or default to a known admin ID if needed
@@ -58,7 +58,7 @@ namespace backend.Controllers
         // PUT /api/tasks/{id}
         // ------------------------------------------------------
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTask(string id, [FromBody] backend.Models.Task task)
+        public async System.Threading.Tasks.Task<IActionResult> UpdateTask(string id, [FromBody] backend.Models.Task task)
         {
             if (task == null) return BadRequest("Dữ liệu task trống!");
             var updated = await _service.UpdateTaskAsync(id, task);
@@ -70,7 +70,7 @@ namespace backend.Controllers
         // DELETE /api/tasks/{id}
         // ------------------------------------------------------
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTask(string id)
+        public async System.Threading.Tasks.Task<IActionResult> DeleteTask(string id)
         {
             bool deleted = await _service.DeleteTaskAsync(id);
             return Ok(new { message = "Xóa task thành công" });
@@ -80,7 +80,7 @@ namespace backend.Controllers
         // GET /api/tasks/kanban
         // ------------------------------------------------------
         [HttpGet("kanban")]
-        public async Task<IActionResult> GetKanban()
+        public async System.Threading.Tasks.Task<IActionResult> GetKanban()
         {
             var result = await _service.GetKanbanAsync();
             return Ok(result);
@@ -90,7 +90,7 @@ namespace backend.Controllers
         // PATCH /api/tasks/reassign/{id}
         // ------------------------------------------------------
         [HttpPatch("reassign/{id}")]
-        public async Task<IActionResult> ReassignTask(string id, [FromQuery] string newEmployeeId)
+        public async System.Threading.Tasks.Task<IActionResult> ReassignTask(string id, [FromQuery] string newEmployeeId)
         {
             var result = await _service.ReassignTaskAsync(id, newEmployeeId);
             return result ? Ok() : NotFound();
@@ -100,7 +100,7 @@ namespace backend.Controllers
         // PATCH /api/tasks/status/{id} 
         // ------------------------------------------------------
         [HttpPatch("status/{id}")]
-        public async Task<IActionResult> UpdateStatus(string id, [FromQuery] string newStatus)
+        public async System.Threading.Tasks.Task<IActionResult> UpdateStatus(string id, [FromQuery] string newStatus)
         {
             var result = await _service.UpdateTaskStatusAsync(id, newStatus);
             return result == null ? NotFound() : Ok(result);
@@ -110,7 +110,7 @@ namespace backend.Controllers
         // GET /api/tasks/employee/{id}
         // ------------------------------------------------------
         [HttpGet("employee/{id}")]
-        public async Task<IActionResult> GetTasksByEmployee(string id)
+        public async System.Threading.Tasks.Task<IActionResult> GetTasksByEmployee(string id)
         {
             var tasks = await _service.GetTasksByEmployeeAsync(id);
             return Ok(tasks);

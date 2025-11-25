@@ -10,6 +10,8 @@ namespace backend.Models
         public int PendingTasks { get; set; }
         public double AveragePerformanceScore { get; set; }
         public int TotalTasks { get; set; } 
+        public int ActiveCampaigns { get; set; }
+        public int TotalLeads { get; set; }
     }
 
     public class SalesStage

@@ -29,8 +29,11 @@ import {
   SyncOutlined,
   ExclamationCircleOutlined,
   UserOutlined,
+  UnorderedListOutlined,
+  AppstoreOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
-import { taskAPI } from "../../services/api";
+import { taskAPI, employeeAPI, customerAPI, contractAPI } from "../../services/api";
 import "./Tasks.css";
 import dayjs from "dayjs";
 
@@ -41,25 +44,38 @@ const { Option } = Select;
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("kanban"); // "kanban" or "list"
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [form] = Form.useForm();
 
-  const fetchTasks = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await taskAPI.getAll();
-      setTasks(response.data);
+      const [tasksRes, employeesRes, customersRes, contractsRes] = await Promise.all([
+        taskAPI.getAll(),
+        employeeAPI.getAll(),
+        customerAPI.getAll(),
+        contractAPI.getAll()
+      ]);
+      setTasks(tasksRes.data || []);
+      setEmployees(employeesRes.data || []);
+      setCustomers(customersRes.data || []);
+      setContracts(contractsRes.data || []);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
-      message.error("Không thể tải danh sách công việc");
+      console.error("Error fetching data:", error);
+      message.error("Không thể tải dữ liệu");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTasks();
+    fetchData();
   }, []);
 
   // Statistics
@@ -117,7 +133,9 @@ export default function Tasks() {
     try {
       await taskAPI.delete(id);
       message.success("Đã xóa công việc");
-      fetchTasks();
+      await taskAPI.delete(id);
+      message.success("Đã xóa công việc");
+      fetchData();
     } catch (error) {
       message.error("Không thể xóa công việc");
     }
@@ -150,7 +168,9 @@ export default function Tasks() {
         }
         setIsModalOpen(false);
         form.resetFields();
-        fetchTasks();
+        setIsModalOpen(false);
+        form.resetFields();
+        fetchData();
       } catch (error) {
         message.error("Có lỗi xảy ra");
       }
@@ -177,14 +197,28 @@ export default function Tasks() {
       {/* Header */}
       <div className="tasks-header">
         <Title level={2}>Quản lý Công việc</Title>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-          size="large"
-        >
-          Thêm công việc
-        </Button>
+        <Space>
+          <Button
+            icon={<BarChartOutlined />}
+            onClick={() => setIsStatsOpen(true)}
+          >
+            Hiệu suất
+          </Button>
+          <Button
+            icon={viewMode === "kanban" ? <UnorderedListOutlined /> : <AppstoreOutlined />}
+            onClick={() => setViewMode(viewMode === "kanban" ? "list" : "kanban")}
+          >
+            {viewMode === "kanban" ? "Danh sách" : "Kanban"}
+          </Button>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAdd}
+            size="large"
+          >
+            Thêm công việc
+          </Button>
+        </Space>
       </div>
 
       {/* Statistics */}
@@ -237,127 +271,188 @@ export default function Tasks() {
       </div>
 
       {/* Kanban Board */}
-      <div className="kanban-board-container">
-        <Row gutter={[16, 16]}>
-          {statusColumns.map((column) => (
-            <Col xs={24} lg={8} key={column.key}>
-              <div className="kanban-column">
-                <div className="kanban-column-header">
-                  <Space>
-                    <span style={{ color: column.color, fontSize: 18 }}>
-                      {column.icon}
-                    </span>
-                    <Text strong style={{ fontSize: 15 }}>
-                      {column.label}
-                    </Text>
-                  </Space>
-                  <Badge
-                    count={column.count}
-                    style={{
-                      backgroundColor: column.color,
-                    }}
-                  />
-                </div>
 
-                <div className="kanban-column-body">
-                  {tasks
-                    .filter((t) => t.status === column.key)
-                    .map((task) => {
-                      const priorityConfig = getPriorityConfig(task.priority);
-                      return (
-                        <Card
-                          key={task.id}
-                          className="kanban-task-card"
-                          size="small"
-                          hoverable
-                        >
-                          <div className="task-card-header">
-                            <Text strong className="task-title">
-                              {task.title}
-                            </Text>
-                            <Tag color={priorityConfig.color} className="priority-tag">
-                              {priorityConfig.text}
-                            </Tag>
-                          </div>
-
-                          <Text
-                            type="secondary"
-                            className="task-description"
-                            ellipsis={{ rows: 2 }}
-                          >
-                            {task.description}
-                          </Text>
-
-                          <div className="task-meta">
-                            <Space size="small">
-                              <ClockCircleOutlined style={{ fontSize: 12 }} />
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {task.dueDate
-                                  ? dayjs(task.dueDate).format("DD/MM/YYYY")
-                                  : "Không có hạn"}
-                              </Text>
-                            </Space>
-                          </div>
-
-                          {task.assignedTo && (
-                            <div className="task-assignee">
-                              <Tooltip title={task.assignedTo}>
-                                <Avatar size={24} icon={<UserOutlined />} />
-                              </Tooltip>
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {task.assignedTo}
-                              </Text>
-                            </div>
-                          )}
-
-                          {task.relatedCustomer && (
-                            <Tag color="blue" className="customer-tag">
-                              {task.relatedCustomer}
-                            </Tag>
-                          )}
-
-                          <div className="task-actions">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<EditOutlined />}
-                              onClick={() => handleEdit(task)}
-                            >
-                              Sửa
-                            </Button>
-                            <Popconfirm
-                              title="Xóa công việc"
-                              description="Bạn có chắc muốn xóa công việc này?"
-                              onConfirm={() => handleDelete(task.id)}
-                              okText="Xóa"
-                              cancelText="Hủy"
-                              okButtonProps={{ danger: true }}
-                            >
-                              <Button
-                                type="text"
-                                size="small"
-                                danger
-                                icon={<DeleteOutlined />}
-                              >
-                                Xóa
-                              </Button>
-                            </Popconfirm>
-                          </div>
-                        </Card>
-                      );
-                    })}
-
-                  {tasks.filter((t) => t.status === column.key).length === 0 && (
-                    <div className="kanban-empty">
-                      <Text type="secondary">Không có công việc</Text>
+      {/* View Content */}
+      {
+        viewMode === "kanban" ? (
+          <div className="kanban-board-container">
+            <Row gutter={[16, 16]}>
+              {statusColumns.map((column) => (
+                <Col xs={24} lg={8} key={column.key}>
+                  <div className="kanban-column">
+                    <div className="kanban-column-header">
+                      <Space>
+                        <span style={{ color: column.color, fontSize: 18 }}>
+                          {column.icon}
+                        </span>
+                        <Text strong style={{ fontSize: 15 }}>
+                          {column.label}
+                        </Text>
+                      </Space>
+                      <Badge
+                        count={column.count}
+                        style={{
+                          backgroundColor: column.color,
+                        }}
+                      />
                     </div>
-                  )}
+
+                    <div className="kanban-column-body">
+                      {tasks
+                        .filter((t) => t.status === column.key)
+                        .map((task) => {
+                          const priorityConfig = getPriorityConfig(task.priority);
+                          const isOverdue = task.dueDate && dayjs(task.dueDate).isBefore(dayjs(), 'day') && task.status !== 'Completed';
+
+                          return (
+                            <Card
+                              key={task.id}
+                              className={`kanban-task-card ${isOverdue ? 'task-overdue' : ''}`}
+                              size="small"
+                              hoverable
+                              style={isOverdue ? { borderLeft: '4px solid #ff4d4f' } : {}}
+                            >
+                              <div className="task-card-header">
+                                <Text strong className="task-title">
+                                  {task.title}
+                                </Text>
+                                <Tag color={priorityConfig.color} className="priority-tag">
+                                  {priorityConfig.text}
+                                </Tag>
+                              </div>
+
+                              <Text
+                                type="secondary"
+                                className="task-description"
+                                ellipsis={{ rows: 2 }}
+                              >
+                                {task.description}
+                              </Text>
+
+                              <div className="task-meta">
+                                <Space size="small">
+                                  <ClockCircleOutlined style={{ fontSize: 12, color: isOverdue ? '#ff4d4f' : 'inherit' }} />
+                                  <Text type={isOverdue ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
+                                    {task.dueDate
+                                      ? dayjs(task.dueDate).format("DD/MM/YYYY")
+                                      : "Không có hạn"}
+                                  </Text>
+                                </Space>
+                              </div>
+
+                              {task.assignedTo && (
+                                <div className="task-assignee">
+                                  <Tooltip title={employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo}>
+                                    <Avatar size={24} icon={<UserOutlined />} />
+                                  </Tooltip>
+                                  <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                                    {employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo}
+                                  </Text>
+                                </div>
+                              )}
+
+                              <Space wrap style={{ marginTop: 8 }}>
+                                {task.relatedCustomer && (
+                                  <Tag color="blue" className="customer-tag">
+                                    {customers.find(c => c.id === task.relatedCustomer)?.name || task.relatedCustomer}
+                                  </Tag>
+                                )}
+                                {task.relatedContractId && (
+                                  <Tag color="purple">
+                                    HĐ: {task.relatedContractId}
+                                  </Tag>
+                                )}
+                              </Space>
+
+                              <div className="task-actions">
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  icon={<EditOutlined />}
+                                  onClick={() => handleEdit(task)}
+                                >
+                                  Sửa
+                                </Button>
+                                <Popconfirm
+                                  title="Xóa công việc"
+                                  description="Bạn có chắc muốn xóa công việc này?"
+                                  onConfirm={() => handleDelete(task.id)}
+                                  okText="Xóa"
+                                  cancelText="Hủy"
+                                  okButtonProps={{ danger: true }}
+                                >
+                                  <Button
+                                    type="text"
+                                    size="small"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </Popconfirm>
+                              </div>
+                            </Card>
+                          );
+                        })}
+
+                      {tasks.filter((t) => t.status === column.key).length === 0 && (
+                        <div className="kanban-empty">
+                          <Text type="secondary">Không có công việc</Text>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        ) : (
+          <Card className="task-list-view">
+            <div className="task-list-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 100px', padding: '12px 16px', fontWeight: 'bold', borderBottom: '1px solid #f0f0f0' }}>
+              <div>Tiêu đề</div>
+              <div>Trạng thái</div>
+              <div>Ưu tiên</div>
+              <div>Người phụ trách</div>
+              <div>Hạn chót</div>
+              <div style={{ textAlign: 'right' }}>Thao tác</div>
+            </div>
+            {tasks.map(task => {
+              const priorityConfig = getPriorityConfig(task.priority);
+              const isOverdue = task.dueDate && dayjs(task.dueDate).isBefore(dayjs(), 'day') && task.status !== 'Completed';
+              return (
+                <div key={task.id} className="task-list-item" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 100px', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', alignItems: 'center', background: isOverdue ? '#fff1f0' : 'white' }}>
+                  <div>
+                    <div style={{ fontWeight: 500 }}>{task.title}</div>
+                    <div style={{ fontSize: 12, color: '#8c8c8c' }}>{task.description}</div>
+                  </div>
+                  <div>
+                    <Tag color={statusColumns.find(c => c.key === task.status)?.color}>
+                      {statusColumns.find(c => c.key === task.status)?.label || task.status}
+                    </Tag>
+                  </div>
+                  <div>
+                    <Tag color={priorityConfig.color}>{priorityConfig.text}</Tag>
+                  </div>
+                  <div>
+                    {employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo || '-'}
+                  </div>
+                  <div style={{ color: isOverdue ? '#ff4d4f' : 'inherit' }}>
+                    {task.dueDate ? dayjs(task.dueDate).format("DD/MM/YYYY") : "-"}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <Space>
+                      <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(task)} />
+                      <Popconfirm title="Xóa?" onConfirm={() => handleDelete(task.id)} okText="Xóa" cancelText="Hủy">
+                        <Button type="text" danger icon={<DeleteOutlined />} />
+                      </Popconfirm>
+                    </Space>
+                  </div>
                 </div>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </div>
+              );
+            })}
+          </Card>
+        )
+      }
 
       {/* Modal */}
       <Modal
@@ -415,12 +510,37 @@ export default function Tasks() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="assignedTo" label="Người phụ trách">
-                <Input />
+                <Select placeholder="Chọn nhân viên">
+                  {employees.map(emp => (
+                    <Option key={emp.id} value={emp.id}>{emp.name}</Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="relatedCustomer" label="Khách hàng liên quan">
-                <Input />
+                <Select placeholder="Chọn khách hàng">
+                  {customers.map(cust => (
+                    <Option key={cust.id} value={cust.id}>{cust.name}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="relatedContractId" label="Hợp đồng liên quan">
+                <Select placeholder="Chọn hợp đồng">
+                  {contracts.map(cont => (
+                    <Option key={cont.id} value={cont.id}>{cont.id} - {dayjs(cont.purchaseDate).format("DD/MM/YYYY")}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="relatedProjectId" label="Dự án liên quan">
+                <Input placeholder="Nhập mã dự án" />
               </Form.Item>
             </Col>
           </Row>
@@ -439,6 +559,36 @@ export default function Tasks() {
           </Row>
         </Form>
       </Modal>
-    </div>
+
+      {/* Stats Modal */}
+      <Modal
+        title="Hiệu suất nhân viên"
+        open={isStatsOpen}
+        onCancel={() => setIsStatsOpen(false)}
+        footer={null}
+        width={600}
+      >
+        <div className="performance-stats">
+          {employees.map(emp => {
+            const empTasks = tasks.filter(t => t.assignedTo === emp.id);
+            const completed = empTasks.filter(t => t.status === "Completed").length;
+            const total = empTasks.length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            return (
+              <div key={emp.id} style={{ marginBottom: 16, padding: 12, border: '1px solid #f0f0f0', borderRadius: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <strong>{emp.name}</strong>
+                  <span>{completed}/{total} hoàn thành</span>
+                </div>
+                <div style={{ height: 8, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ width: `${percent}%`, background: percent >= 80 ? '#52c41a' : '#1890ff', height: '100%' }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Modal>
+    </div >
   );
 }

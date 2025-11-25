@@ -1,6 +1,7 @@
 using backend.Models;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
+using Task = System.Threading.Tasks.Task;
 
 namespace backend.Service
 {
@@ -158,7 +159,7 @@ namespace backend.Service
             }
         }
 
-        private Task BroadcastSummaryAsync()
+        private System.Threading.Tasks.Task BroadcastSummaryAsync()
         {
             var summary = GetSummary();
             foreach (var subscriber in _subscribers.Values)
@@ -166,7 +167,7 @@ namespace backend.Service
                 subscriber.Writer.TryWrite(summary);
             }
 
-            return Task.CompletedTask;
+            return System.Threading.Tasks.Task.CompletedTask;
         }
 
         private List<Notification> SeedNotifications()

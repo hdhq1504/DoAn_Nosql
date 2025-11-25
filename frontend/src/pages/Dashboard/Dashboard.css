@@ -25,21 +25,6 @@
   overflow: hidden;
 }
 
-.stat-card-modern::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%);
-}
-
-.stat-card-modern:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-4px);
-}
-
 .stat-card-modern .ant-statistic-title {
   font-size: 14px;
   color: #8c8c8c;

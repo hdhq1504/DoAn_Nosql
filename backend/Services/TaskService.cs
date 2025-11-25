@@ -72,7 +72,9 @@ namespace backend.Service
                 status: '{task.status}', 
                 type: '{task.type}', 
                 dueDate: datetime('{task.dueDate:O}'), 
-                createdDate: datetime('{task.createddate:O}')
+                createdDate: datetime('{task.createddate:O}'),
+                relatedContractId: '{task.relatedContractId}',
+                relatedProjectId: '{task.relatedProjectId}'
             }})
             MERGE (e)-[:ASSIGNED_TO]->(t)
             RETURN t";
@@ -165,7 +167,9 @@ namespace backend.Service
                 t.priority = '{task.priority}',
                 t.status = '{task.status}',
                 t.type = '{task.type}',
-                t.dueDate = datetime('{task.dueDate:O}')
+                t.dueDate = datetime('{task.dueDate:O}'),
+                t.relatedContractId = '{task.relatedContractId}',
+                t.relatedProjectId = '{task.relatedProjectId}'
             RETURN t";
 
             var doc = await RunCypherAsync(cypher);

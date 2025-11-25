@@ -63,9 +63,14 @@ namespace backend.Service
                     startDate:date('{campaign.startDate:yyyy-MM-dd}'),
                     endDate:date('{campaign.endDate:yyyy-MM-dd}'),
                     budget:{campaign.budget},
-                    status:'{campaign.status}'
+                    status:'{campaign.status}',
+                    description:'{campaign.description}',
+                    criteria:'{campaign.criteria}',
+                    leads:{campaign.leads},
+                    conversions:{campaign.conversions},
+                    actualRevenue:{campaign.actualRevenue}
                 }})
-                RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status";
+                RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status, c.description, c.criteria, c.leads, c.conversions, c.actualRevenue";
 
             var doc = await RunCypherAsync(cypher);
             var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
@@ -84,14 +89,19 @@ namespace backend.Service
                 startDate = DateTime.Parse(row[3].GetString() ?? "2025-01-01"),
                 endDate = DateTime.Parse(row[4].GetString() ?? "2025-01-01"),
                 budget = row[5].GetDouble(),
-                status = row[6].GetString() ?? ""
+                status = row[6].GetString() ?? "",
+                description = row.GetArrayLength() > 7 ? row[7].GetString() ?? "" : "",
+                criteria = row.GetArrayLength() > 8 ? row[8].GetString() ?? "" : "",
+                leads = row.GetArrayLength() > 9 ? row[9].GetInt32() : 0,
+                conversions = row.GetArrayLength() > 10 ? row[10].GetInt32() : 0,
+                actualRevenue = row.GetArrayLength() > 11 ? row[11].GetDouble() : 0.0
             };
         }
 
         // Lấy danh sách chiến dịch
         public async Task<IEnumerable<Campaign>> GetCampaignsAsync()
         {
-            var cypher = @"MATCH (c:Campaign) RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status ORDER BY c.startDate DESC";
+            var cypher = @"MATCH (c:Campaign) RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status, c.description, c.criteria, c.leads, c.conversions, c.actualRevenue ORDER BY c.startDate DESC";
             var doc = await RunCypherAsync(cypher);
             var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
 
@@ -106,7 +116,12 @@ namespace backend.Service
                     startDate = DateTime.Parse(row[3].GetString() ?? "2025-01-01"),
                     endDate = DateTime.Parse(row[4].GetString() ?? "2025-01-01"),
                     budget = row[5].GetDouble(),
-                    status = row[6].GetString() ?? ""
+                    status = row[6].GetString() ?? "",
+                    description = row.GetArrayLength() > 7 ? row[7].GetString() ?? "" : "",
+                    criteria = row.GetArrayLength() > 8 ? row[8].GetString() ?? "" : "",
+                    leads = row.GetArrayLength() > 9 ? row[9].GetInt32() : 0,
+                    conversions = row.GetArrayLength() > 10 ? row[10].GetInt32() : 0,
+                    actualRevenue = row.GetArrayLength() > 11 ? row[11].GetDouble() : 0.0
                 };
             });
         }
@@ -114,7 +129,7 @@ namespace backend.Service
         // Xem chi tiết chiến dịch
         public async Task<Campaign?> GetCampaignByidAsync(string id)
         {
-            var cypher = $"MATCH (c:Campaign {{id:'{id}'}}) RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status";
+            var cypher = $"MATCH (c:Campaign {{id:'{id}'}}) RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status, c.description, c.criteria, c.leads, c.conversions, c.actualRevenue";
             var doc = await RunCypherAsync(cypher);
             var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
             if (data.GetArrayLength() == 0) return null;
@@ -128,7 +143,12 @@ namespace backend.Service
                 startDate = DateTime.Parse(row[3].GetString() ?? "2025-01-01"),
                 endDate = DateTime.Parse(row[4].GetString() ?? "2025-01-01"),
                 budget = row[5].GetDouble(),
-                status = row[6].GetString() ?? ""
+                status = row[6].GetString() ?? "",
+                description = row.GetArrayLength() > 7 ? row[7].GetString() ?? "" : "",
+                criteria = row.GetArrayLength() > 8 ? row[8].GetString() ?? "" : "",
+                leads = row.GetArrayLength() > 9 ? row[9].GetInt32() : 0,
+                conversions = row.GetArrayLength() > 10 ? row[10].GetInt32() : 0,
+                actualRevenue = row.GetArrayLength() > 11 ? row[11].GetDouble() : 0.0
             };
         }
 
@@ -142,8 +162,13 @@ namespace backend.Service
                     c.startDate = date('{req.startDate:yyyy-MM-dd}'),
                     c.endDate = date('{req.endDate:yyyy-MM-dd}'),
                     c.budget = {req.budget},
-                    c.status = '{req.status}'
-                RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status";
+                    c.status = '{req.status}',
+                    c.description = '{req.description}',
+                    c.criteria = '{req.criteria}',
+                    c.leads = {req.leads},
+                    c.conversions = {req.conversions},
+                    c.actualRevenue = {req.actualRevenue}
+                RETURN c.id, c.name, c.type, c.startDate, c.endDate, c.budget, c.status, c.description, c.criteria, c.leads, c.conversions, c.actualRevenue";
 
             var doc = await RunCypherAsync(cypher);
             var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
@@ -161,7 +186,12 @@ namespace backend.Service
                 startDate = DateTime.Parse(row[3].GetString() ?? "2025-01-01"),
                 endDate = DateTime.Parse(row[4].GetString() ?? "2025-01-01"),
                 budget = row[5].GetDouble(),
-                status = row[6].GetString() ?? ""
+                status = row[6].GetString() ?? "",
+                description = row.GetArrayLength() > 7 ? row[7].GetString() ?? "" : "",
+                criteria = row.GetArrayLength() > 8 ? row[8].GetString() ?? "" : "",
+                leads = row.GetArrayLength() > 9 ? row[9].GetInt32() : 0,
+                conversions = row.GetArrayLength() > 10 ? row[10].GetInt32() : 0,
+                actualRevenue = row.GetArrayLength() > 11 ? row[11].GetDouble() : 0.0
             };
         }
 

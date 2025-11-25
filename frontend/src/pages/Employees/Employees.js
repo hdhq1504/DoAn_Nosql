@@ -17,7 +17,8 @@ import {
   message,
   Spin,
   DatePicker,
-  InputNumber
+  InputNumber,
+  Progress
 } from "antd";
 import {
   PlusOutlined,
@@ -92,13 +93,18 @@ export default function Employees() {
         const formattedValues = {
           ...values,
           hiredate: values.hiredate ? values.hiredate.toISOString() : null,
+          status: values.status || "Active",
         };
 
         if (editingEmployee) {
-          await employeeAPI.update(editingEmployee.id, formattedValues);
+          await employeeAPI.update(editingEmployee.id, { ...formattedValues, id: editingEmployee.id });
           messageApi.success("Đã cập nhật nhân viên");
         } else {
-          await employeeAPI.create(formattedValues);
+          const newEmployee = {
+            ...formattedValues,
+            id: `EMP${Date.now()}`,
+          };
+          await employeeAPI.create(newEmployee);
           messageApi.success("Đã thêm nhân viên mới");
         }
         setIsModalOpen(false);
@@ -119,32 +125,39 @@ export default function Employees() {
     {
       title: "Nhân viên",
       key: "name",
+      width: 250,
       render: (_, record) => (
-        <Space>
-          <Avatar icon={<UserOutlined />} src={record.avatar} />
+        <Space size={12}>
+          <Avatar
+            icon={<UserOutlined />}
+            src={record.avatar}
+            size={40}
+            style={{ border: '2px solid #f0f0f0' }}
+          />
           <div>
-            <Text strong style={{ display: "block" }}>{record.name}</Text>
+            <Text strong style={{ display: "block", fontSize: 15 }}>{record.name}</Text>
             <Text type="secondary" style={{ fontSize: 12 }}>{record.id}</Text>
           </div>
         </Space>
       ),
     },
     {
-      title: "Vị trí",
-      dataIndex: "position",
+      title: "Vị trí & Phòng ban",
       key: "position",
-    },
-    {
-      title: "Phòng ban",
-      dataIndex: "department",
-      key: "department",
-      render: (text) => <Tag color="blue">{text}</Tag>,
+      width: 200,
+      render: (_, record) => (
+        <div>
+          <Text style={{ display: "block", fontWeight: 500 }}>{record.position}</Text>
+          <Tag color="blue" style={{ marginTop: 4 }}>{record.department}</Tag>
+        </div>
+      ),
     },
     {
       title: "Liên hệ",
       key: "contact",
+      width: 250,
       render: (_, record) => (
-        <Space direction="vertical" size={0}>
+        <Space direction="vertical" size={2}>
           <Space>
             <MailOutlined style={{ color: "#1890ff" }} />
             <Text style={{ fontSize: 13 }}>{record.email}</Text>
@@ -160,8 +173,12 @@ export default function Employees() {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      width: 120,
       render: (status) => (
-        <Tag color={status === "Active" ? "success" : "error"}>
+        <Tag
+          color={status === "Active" ? "success" : "error"}
+          style={{ borderRadius: 10, padding: '0 10px' }}
+        >
           {status === "Active" ? "Đang làm việc" : "Đã nghỉ"}
         </Tag>
       ),
@@ -170,21 +187,30 @@ export default function Employees() {
       title: "Hiệu suất",
       dataIndex: "performanceScore",
       key: "performanceScore",
+      width: 100,
       render: (score) => (
-        <Text strong style={{ color: score >= 80 ? "#52c41a" : score >= 50 ? "#faad14" : "#ff4d4f" }}>
-          {score}/100
-        </Text>
+        <div style={{ textAlign: 'center' }}>
+          <Progress
+            type="circle"
+            percent={score}
+            width={40}
+            strokeColor={score >= 80 ? "#52c41a" : score >= 50 ? "#faad14" : "#ff4d4f"}
+          />
+        </div>
       ),
     },
     {
       title: "Hành động",
       key: "action",
+      width: 100,
+      fixed: 'right',
       render: (_, record) => (
         <Space>
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
+            style={{ color: '#1890ff' }}
           />
           <Popconfirm
             title="Xóa nhân viên"

@@ -60,12 +60,18 @@ namespace backend.Service
                 WITH totalCustomers, count(e) AS totalEmployees
                 MATCH (t:Task)
                 WITH totalCustomers, totalEmployees, count(t) AS totalTasks
+                MATCH (camp:Campaign {status: 'Active'})
+                WITH totalCustomers, totalEmployees, totalTasks, count(camp) AS activeCampaigns
+                MATCH (c_lead:Campaign)
+                WITH totalCustomers, totalEmployees, totalTasks, activeCampaigns, sum(c_lead.leads) AS totalLeads
                 OPTIONAL MATCH (:Customer)-[r:OWNS]->(p:Product)
                 RETURN 
                     totalCustomers,
                     totalEmployees,
                     totalTasks,
-                    coalesce(sum(p.price), 0) AS totalRevenue
+                    coalesce(sum(r.contractValue), 0) AS totalRevenue,
+                    activeCampaigns,
+                    totalLeads
             ";
 
             var doc = await RunCypherAsync(cypher);
@@ -85,7 +91,9 @@ namespace backend.Service
                 TotalCustomers = row[0].ValueKind == JsonValueKind.Number ? row[0].GetInt32() : 0,
                 TotalEmployees = row[1].ValueKind == JsonValueKind.Number ? row[1].GetInt32() : 0,
                 TotalTasks = row[2].ValueKind == JsonValueKind.Number ? row[2].GetInt32() : 0,
-                TotalRevenue = row[3].ValueKind == JsonValueKind.Number ? row[3].GetDouble() : 0
+                TotalRevenue = row[3].ValueKind == JsonValueKind.Number ? row[3].GetDouble() : 0,
+                ActiveCampaigns = row[4].ValueKind == JsonValueKind.Number ? row[4].GetInt32() : 0,
+                TotalLeads = row[5].ValueKind == JsonValueKind.Number ? row[5].GetInt32() : 0
             };
             return metrics;
         }
@@ -93,21 +101,23 @@ namespace backend.Service
         // ------------------------------
         // SALES PIPELINE
         // ------------------------------
-       public async Task<IEnumerable<SalesStage>> GetSalesPipelineAsync()
+        public async Task<IEnumerable<SalesStage>> GetSalesPipelineAsync()
         {
             var cypher = @"
-                MATCH (c:Customer)-[r:OWNS]->(p:Product)
-                WITH p.category AS Stage, collect(r.contractValue) AS Values
+                MATCH (c:Customer)
+                WITH c.status AS Stage, count(c) AS Count, sum(c.lifetimevalue) AS Value
                 RETURN 
                     Stage,
-                    size(Values) AS DealCount,
-                    reduce(total = 0, v IN Values | total + coalesce(v, 0)) AS TotalValue,
-                    round(
-                        CASE WHEN size(Values) > 0 
-                            THEN (reduce(total = 0, v IN Values | total + coalesce(v, 0))) / size(Values) 
-                            ELSE 0 
-                        END, 2
-                    ) AS AverageDealValue
+                    Count,
+                    Value,
+                    CASE WHEN Count > 0 THEN Value / Count ELSE 0 END AS AvgValue
+                ORDER BY 
+                    CASE Stage 
+                        WHEN 'Lead' THEN 1 
+                        WHEN 'Potential' THEN 2 
+                        WHEN 'Active' THEN 3 
+                        ELSE 4 
+                    END
             ";
 
             var doc = await RunCypherAsync(cypher);

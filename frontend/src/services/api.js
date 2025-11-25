@@ -84,6 +84,8 @@ export const campaignAPI = {
   create: (data) => apiClient.post('/campaigns', data),
   update: (id, data) => apiClient.put(`/campaigns/${id}`, data),
   delete: (id) => apiClient.delete(`/campaigns/${id}`),
+  assignCustomers: (id, customerIds) => apiClient.post(`/campaigns/assign-customers/${id}`, customerIds),
+  getTargetCustomers: (id) => apiClient.get(`/campaigns/target-customers/${id}`),
 };
 
 // Analytics API
@@ -97,7 +99,7 @@ export const analyticsAPI = {
 
 // Contract API
 export const contractAPI = {
-  getAll: () => apiClient.get('/contract'),
+  getAll: (params) => apiClient.get('/contract', { params }),
   getById: (id) => apiClient.get(`/contract/${id}`),
   create: (data) => apiClient.post('/contract', data),
   update: (id, data) => apiClient.put(`/contract/${id}`, data),
@@ -120,6 +122,13 @@ export const notificationAPI = {
   markUnread: (id) => apiClient.post(`/notification/${id}/unread`),
   markAllRead: () => apiClient.post('/notification/mark-all-read'),
   delete: (id) => apiClient.delete(`/notification/${id}`),
+};
+
+// Auth API
+export const authAPI = {
+  login: (username, password) => apiClient.post('/auth/login', { username, password }),
+  getProfile: (userId) => apiClient.get(`/auth/me/${userId}`),
+  register: (data) => apiClient.post('/auth/register', data),
 };
 
 export default apiClient;

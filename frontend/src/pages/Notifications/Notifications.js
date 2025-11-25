@@ -230,41 +230,62 @@ export default function Notifications() {
               return (
                 <List.Item
                   className={`notification-item ${!item.isRead ? "unread" : ""}`}
+                  style={{
+                    padding: '16px 24px',
+                    borderBottom: '1px solid #f0f0f0',
+                    background: item.isRead ? '#fff' : '#e6f7ff',
+                    transition: 'background 0.3s'
+                  }}
                   actions={[
-                    item.isRead ? (
-                      <Button type="text" size="small" onClick={() => handleMarkAsUnread(item.id)}>
-                        Đánh dấu chưa đọc
-                      </Button>
-                    ) : (
-                      <Button type="text" size="small" onClick={() => handleMarkAsRead(item.id)}>
-                        Đánh dấu đã đọc
-                      </Button>
-                    ),
-                    <Popconfirm
-                      title="Xóa thông báo"
-                      description="Bạn có chắc muốn xóa thông báo này?"
-                      onConfirm={() => handleDelete(item.id)}
-                      okText="Xóa"
-                      cancelText="Hủy"
-                      okButtonProps={{ danger: true }}
-                    >
-                      <Button type="text" danger size="small" icon={<DeleteOutlined />} />
-                    </Popconfirm>,
+                    <Space>
+                      {item.isRead ? (
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<MailOutlined />}
+                          onClick={() => handleMarkAsUnread(item.id)}
+                          title="Đánh dấu chưa đọc"
+                        />
+                      ) : (
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<CheckCircleOutlined />}
+                          onClick={() => handleMarkAsRead(item.id)}
+                          title="Đánh dấu đã đọc"
+                          style={{ color: '#1890ff' }}
+                        />
+                      )}
+                      <Popconfirm
+                        title="Xóa thông báo"
+                        description="Bạn có chắc muốn xóa thông báo này?"
+                        onConfirm={() => handleDelete(item.id)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        okButtonProps={{ danger: true }}
+                      >
+                        <Button type="text" danger size="small" icon={<DeleteOutlined />} title="Xóa" />
+                      </Popconfirm>
+                    </Space>
                   ]}
                 >
                   <List.Item.Meta
                     avatar={
-                      <Badge dot={!item.isRead} offset={[-5, 5]}>
-                        <Avatar icon={config.icon} style={{ backgroundColor: config.color }} size={48} />
+                      <Badge dot={!item.isRead} offset={[-5, 5]} color="#1890ff">
+                        <Avatar
+                          icon={config.icon}
+                          style={{ backgroundColor: item.isRead ? '#f0f0f0' : config.color, color: item.isRead ? '#8c8c8c' : '#fff' }}
+                          size={48}
+                        />
                       </Badge>
                     }
                     title={
                       <Space>
-                        <Text strong style={{ fontSize: 15 }}>
+                        <Text strong style={{ fontSize: 16, color: item.isRead ? '#595959' : '#262626' }}>
                           {item.title}
                         </Text>
                         {!item.isRead && (
-                          <Tag color="orange" style={{ fontSize: 11 }}>
+                          <Tag color="blue" style={{ borderRadius: 10 }}>
                             Mới
                           </Tag>
                         )}
@@ -272,11 +293,12 @@ export default function Notifications() {
                     }
                     description={
                       <div>
-                        <Text type="secondary">{item.description}</Text>
-                        <br />
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {dayjs(item.createdAt).fromNow()}
-                        </Text>
+                        <Text type="secondary" style={{ fontSize: 14 }}>{item.description}</Text>
+                        <div style={{ marginTop: 4 }}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {dayjs(item.createdAt).fromNow()}
+                          </Text>
+                        </div>
                       </div>
                     }
                   />

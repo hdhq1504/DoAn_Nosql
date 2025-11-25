@@ -9,6 +9,7 @@ import {
   BarChartOutlined,
   TeamOutlined,
   BellOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
 
@@ -35,6 +36,11 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
       key: "products",
       icon: <ShoppingOutlined />,
       label: "Quản lý Sản phẩm",
+    },
+    {
+      key: "contracts",
+      icon: <FileTextOutlined />,
+      label: "Quản lý Hợp đồng",
     },
     {
       key: "tasks",
