@@ -61,7 +61,7 @@ export const productAPI = {
   getAll: () => apiClient.get('/products'),
   getById: (id) => apiClient.get(`/products/${id}`),
   create: (data) => apiClient.post('/products', data),
-  update: (id, data) => apiClient.put(`/products/${id}`, data),
+  update: (id, data) => apiClient.patch(`/products/${id}`, data),
   delete: (id) => apiClient.delete(`/products/${id}`),
 };
 
@@ -69,7 +69,7 @@ export const productAPI = {
 export const taskAPI = {
   getAll: () => apiClient.get('/tasks'),
   getById: (id) => apiClient.get(`/tasks/${id}`),
-  create: (data, employeeId = 'EMP001') => apiClient.post(`/tasks?employeeId=${employeeId}`, data),
+  create: (data) => apiClient.post('/tasks', data),
   update: (id, data) => apiClient.put(`/tasks/${id}`, data),
   delete: (id) => apiClient.delete(`/tasks/${id}`),
   getKanban: () => apiClient.get('/tasks/kanban'),
@@ -122,13 +122,6 @@ export const notificationAPI = {
   markUnread: (id) => apiClient.post(`/notification/${id}/unread`),
   markAllRead: () => apiClient.post('/notification/mark-all-read'),
   delete: (id) => apiClient.delete(`/notification/${id}`),
-};
-
-// Auth API
-export const authAPI = {
-  login: (username, password) => apiClient.post('/auth/login', { username, password }),
-  getProfile: (userId) => apiClient.get(`/auth/me/${userId}`),
-  register: (data) => apiClient.post('/auth/register', data),
 };
 
 export default apiClient;

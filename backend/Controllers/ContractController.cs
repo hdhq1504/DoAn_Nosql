@@ -42,11 +42,22 @@ namespace backend.Controllers
         // ------------------------------------------------------
         // POST /api/contracts (tạo hợp đồng mới)
         // ------------------------------------------------------
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateContract([FromBody] Contract request)
         {
             var result = await _contractService.CreateContractAsync(request);
             return CreatedAtAction(nameof(GetContractById), new { id = result!.id }, result);
+        }
+
+        // ------------------------------------------------------
+        // PUT /api/contracts/{id} (cập nhật toàn bộ thông tin hợp đồng)
+        // ------------------------------------------------------
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateContractFull(string id, [FromBody] Contract request)
+        {
+            var result = await _contractService.UpdateContractFullAsync(id, request);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         // ------------------------------------------------------

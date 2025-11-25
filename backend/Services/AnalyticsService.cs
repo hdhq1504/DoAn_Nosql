@@ -190,20 +190,16 @@ namespace backend.Service
 
 
         // ------------------------------
-        // 4EMPLOYEE PERFORMANCE
+        // EMPLOYEE PERFORMANCE
         // ------------------------------
         public async Task<IEnumerable<EmployeePerformance>> GetEmployeePerformanceAsync()
         {
             var cypher = @"
                 MATCH (e:Employee)
                 OPTIONAL MATCH (e)-[:ASSIGNED_TO]->(t:Task)
-                OPTIONAL MATCH (e)-[:RESPONSIBLE_FOR]->(c:Customer)
-                OPTIONAL MATCH (e)-[s:SOLD]->(p:Product)
-                WITH e,
-                    count(DISTINCT t) AS TotalTasks,
-                    count(DISTINCT c) AS TotalCustomers,
-                    coalesce(sum(s.commission), 0) AS TotalCommission,
-                    coalesce(sum(p.price), 0) AS TotalRevenue
+                OPTIONAL MATCH (t)-[:RELATED_TO]->(c:Customer)
+                OPTIONAL MATCH (c)-[r:OWNS]->(p:Product)
+                WITH e, count(DISTINCT t) AS TotalTasks, count(DISTINCT c) AS TotalCustomers, sum(r.contractValue) AS TotalRevenue, sum(r.commission) AS TotalCommission
                 RETURN 
                     e.id AS EmployeeId,
                     e.name AS EmployeeName,

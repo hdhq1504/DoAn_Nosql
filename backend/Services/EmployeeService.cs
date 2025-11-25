@@ -109,7 +109,7 @@ namespace backend.Service
                 e.email = '{employee.email}',
                 e.phone = '{employee.phone}',
                 e.status = '{employee.status}',
-                e.hiredate: datetime('{employee.hiredate:O}'),
+                e.hiredate = datetime('{employee.hiredate:O}'),
                 e.performanceScore = {employee.performanceScore}
             RETURN e";
 

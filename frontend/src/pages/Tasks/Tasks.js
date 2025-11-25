@@ -44,7 +44,7 @@ const { Option } = Select;
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("kanban"); // "kanban" or "list"
+  const [viewMode, setViewMode] = useState("kanban");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -78,7 +78,6 @@ export default function Tasks() {
     fetchData();
   }, []);
 
-  // Statistics
   const stats = {
     total: tasks.length,
     pending: tasks.filter((t) => t.status === "Pending").length,
@@ -97,7 +96,7 @@ export default function Tasks() {
     {
       key: "In Progress",
       label: "Đang thực hiện",
-      icon: <SyncOutlined spin />,
+      icon: <SyncOutlined />,
       color: "#1890ff",
       count: stats.inProgress,
     },
@@ -123,8 +122,10 @@ export default function Tasks() {
     setEditingTask(task);
     form.setFieldsValue({
       ...task,
+      assignedTo: task.assignedToId,
+      relatedCustomer: task.relatedCustomerId,
       dueDate: task.dueDate ? dayjs(task.dueDate) : null,
-      createdDate: task.createdDate ? dayjs(task.createdDate) : null,
+      createdDate: task.createddate ? dayjs(task.createddate) : null,
     });
     setIsModalOpen(true);
   };
@@ -153,8 +154,14 @@ export default function Tasks() {
         const formattedValues = {
           ...values,
           dueDate: values.dueDate ? values.dueDate.toISOString() : null,
-          createdDate: values.createdDate ? values.createdDate.toISOString() : null,
+          createddate: values.createdDate ? values.createdDate.toISOString() : new Date().toISOString(),
+          assignedToId: values.assignedTo,
+          relatedCustomerId: values.relatedCustomer,
         };
+
+        delete formattedValues.assignedTo;
+        delete formattedValues.relatedCustomer;
+        delete formattedValues.createdDate;
 
         if (editingTask) {
           await taskAPI.update(editingTask.id, formattedValues);
@@ -162,17 +169,16 @@ export default function Tasks() {
         } else {
           await taskAPI.create({
             ...formattedValues,
-            id: `TASK${Date.now()}` // Generate ID if backend doesn't
+            id: `TASK${Date.now()}`
           });
           message.success("Đã thêm công việc mới");
         }
         setIsModalOpen(false);
         form.resetFields();
-        setIsModalOpen(false);
-        form.resetFields();
         fetchData();
       } catch (error) {
-        message.error("Có lỗi xảy ra");
+        console.error("Error saving task:", error);
+        message.error(error.response?.data?.message || "Có lỗi xảy ra");
       }
     });
   };
@@ -194,7 +200,6 @@ export default function Tasks() {
 
   return (
     <div className="tasks-page-modern">
-      {/* Header */}
       <div className="tasks-header">
         <Title level={2}>Quản lý Công việc</Title>
         <Space>
@@ -221,7 +226,6 @@ export default function Tasks() {
         </Space>
       </div>
 
-      {/* Statistics */}
       <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} sm={12} lg={6}>
           <Card className="stat-card-compact">
@@ -248,7 +252,7 @@ export default function Tasks() {
             <Statistic
               title="Đang thực hiện"
               value={stats.inProgress}
-              prefix={<SyncOutlined spin />}
+              prefix={<SyncOutlined />}
               valueStyle={{ color: "#1890ff", fontSize: 24 }}
             />
           </Card>
@@ -265,14 +269,10 @@ export default function Tasks() {
         </Col>
       </Row>
 
-      {/* Kanban Board Title */}
       <div className="kanban-title">
-        <Title level={4}>Bảng Kanban</Title>
+        <Title level={4}>Bảng tiến độ công việc</Title>
       </div>
 
-      {/* Kanban Board */}
-
-      {/* View Content */}
       {
         viewMode === "kanban" ? (
           <div className="kanban-board-container">
@@ -340,21 +340,21 @@ export default function Tasks() {
                                 </Space>
                               </div>
 
-                              {task.assignedTo && (
+                              {task.assignedToId && (
                                 <div className="task-assignee">
-                                  <Tooltip title={employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo}>
+                                  <Tooltip title={employees.find(e => e.id === task.assignedToId)?.name || task.assignedToId}>
                                     <Avatar size={24} icon={<UserOutlined />} />
                                   </Tooltip>
                                   <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                                    {employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo}
+                                    {employees.find(e => e.id === task.assignedToId)?.name || task.assignedToId}
                                   </Text>
                                 </div>
                               )}
 
                               <Space wrap style={{ marginTop: 8 }}>
-                                {task.relatedCustomer && (
+                                {task.relatedCustomerId && (
                                   <Tag color="blue" className="customer-tag">
-                                    {customers.find(c => c.id === task.relatedCustomer)?.name || task.relatedCustomer}
+                                    {customers.find(c => c.id === task.relatedCustomerId)?.name || task.relatedCustomerId}
                                   </Tag>
                                 )}
                                 {task.relatedContractId && (
@@ -434,7 +434,7 @@ export default function Tasks() {
                     <Tag color={priorityConfig.color}>{priorityConfig.text}</Tag>
                   </div>
                   <div>
-                    {employees.find(e => e.id === task.assignedTo)?.name || task.assignedTo || '-'}
+                    {employees.find(e => e.id === task.assignedToId)?.name || task.assignedToId || '-'}
                   </div>
                   <div style={{ color: isOverdue ? '#ff4d4f' : 'inherit' }}>
                     {task.dueDate ? dayjs(task.dueDate).format("DD/MM/YYYY") : "-"}
@@ -477,7 +477,17 @@ export default function Tasks() {
             </Col>
             <Col span={12}>
               <Form.Item name="type" label="Loại">
-                <Input />
+                <Select placeholder="Chọn loại công việc">
+                  <Option value="Tư vấn">Tư vấn</Option>
+                  <Option value="Chăm sóc khách hàng">Chăm sóc khách hàng</Option>
+                  <Option value="Gia hạn hợp đồng">Gia hạn hợp đồng</Option>
+                  <Option value="Thu phí">Thu phí</Option>
+                  <Option value="Xử lý khiếu nại">Xử lý khiếu nại</Option>
+                  <Option value="Gọi điện">Gọi điện</Option>
+                  <Option value="Họp">Họp</Option>
+                  <Option value="Báo cáo">Báo cáo</Option>
+                  <Option value="Khác">Khác</Option>
+                </Select>
               </Form.Item>
             </Col>
           </Row>
@@ -488,7 +498,11 @@ export default function Tasks() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="status" label="Trạng thái">
+              <Form.Item
+                name="status"
+                label="Trạng thái"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+              >
                 <Select>
                   <Option value="Pending">Chờ xử lý</Option>
                   <Option value="In Progress">Đang thực hiện</Option>
@@ -497,7 +511,11 @@ export default function Tasks() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="priority" label="Ưu tiên">
+              <Form.Item
+                name="priority"
+                label="Ưu tiên"
+                rules={[{ required: true, message: "Vui lòng chọn mức ưu tiên" }]}
+              >
                 <Select>
                   <Option value="Low">Thấp</Option>
                   <Option value="Medium">Trung bình</Option>
@@ -509,7 +527,11 @@ export default function Tasks() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="assignedTo" label="Người phụ trách">
+              <Form.Item
+                name="assignedTo"
+                label="Người phụ trách"
+                rules={[{ required: true, message: "Vui lòng chọn người phụ trách" }]}
+              >
                 <Select placeholder="Chọn nhân viên">
                   {employees.map(emp => (
                     <Option key={emp.id} value={emp.id}>{emp.name}</Option>
@@ -547,7 +569,11 @@ export default function Tasks() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="dueDate" label="Ngày hết hạn">
+              <Form.Item
+                name="dueDate"
+                label="Ngày hết hạn"
+                rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn" }]}
+              >
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
@@ -570,7 +596,7 @@ export default function Tasks() {
       >
         <div className="performance-stats">
           {employees.map(emp => {
-            const empTasks = tasks.filter(t => t.assignedTo === emp.id);
+            const empTasks = tasks.filter(t => t.assignedToId === emp.id);
             const completed = empTasks.filter(t => t.status === "Completed").length;
             const total = empTasks.length;
             const percent = total > 0 ? Math.round((completed / total) * 100) : 0;

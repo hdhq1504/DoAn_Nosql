@@ -147,6 +147,9 @@ namespace backend.Service
         // Tạo khách hàng mới (POST /api/customers)
         public async Task<Customer?> CreateCustomerAsync(Customer customer)
         {
+            string createdDateStr = customer.createddate.ToString("yyyy-MM-ddTHH:mm:ss");
+            string lastContactStr = customer.lastcontact.ToString("yyyy-MM-ddTHH:mm:ss");
+
             var cypher = $@"
             CREATE (c:Customer {{
                 id: '{customer.id}',
@@ -158,9 +161,9 @@ namespace backend.Service
                 status: '{customer.status}',
                 segment: '{customer.segment}',
                 company: {(string.IsNullOrEmpty(customer.company) ? "null" : $"'{customer.company}'")},
-                createdDate: datetime(),
+                createddate: datetime('{createdDateStr}'),
                 lifetimeValue: {customer.lifetimevalue},
-                lastContact: datetime(),
+                lastcontact: datetime('{lastContactStr}'),
                 satisfactionScore: {customer.satisfactionScore}
             }})
             RETURN c";
@@ -176,6 +179,9 @@ namespace backend.Service
         // Cập nhật thông tin khách hàng (PATCH)
         public async Task<Customer?> UpdateCustomerAsync(string id, Customer updatedCustomer)
         {
+            string lastContactStr = updatedCustomer.lastcontact.ToString("yyyy-MM-ddTHH:mm:ss");
+            string createdDateStr = updatedCustomer.createddate.ToString("yyyy-MM-ddTHH:mm:ss");
+
             var cypher = $@"
             MATCH (c:Customer {{id: '{id}'}})
             SET c.name = '{updatedCustomer.name}',
@@ -186,9 +192,10 @@ namespace backend.Service
                 c.status = '{updatedCustomer.status}',
                 c.segment = '{updatedCustomer.segment}',
                 c.company = {(string.IsNullOrEmpty(updatedCustomer.company) ? "null" : $"'{updatedCustomer.company}'")},
-                c.lifetimeValue = {updatedCustomer.lifetimevalue},
+                c.lifetimevalue = {updatedCustomer.lifetimevalue},
                 c.satisfactionScore = {updatedCustomer.satisfactionScore},
-                c.lastContact = datetime()
+                c.lastcontact = datetime('{lastContactStr}'),
+                c.createddate = datetime('{createdDateStr}')
             RETURN c";
 
             var doc = await RunCypherAsync(cypher);

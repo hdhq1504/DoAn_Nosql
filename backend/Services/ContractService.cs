@@ -48,7 +48,7 @@ namespace backend.Service
 
         private decimal CalculateCommission(decimal contractValue, decimal commissionRate)
         {
-            return contractValue * commissionRate / 100m;
+            return contractValue * commissionRate;
         }
 
         // ------------------------------------------------------
@@ -98,7 +98,7 @@ namespace backend.Service
         // ------------------------------------------------------
         public async Task<Contract?> CreateContractAsync(Contract contract)
         {
-            decimal commission = CalculateCommission(contract.contractValue, contract.commission);
+            decimal commission = CalculateCommission(contract.contractValue, contract.commissionRate);
             var cypher = $@"
                 MATCH (c:Customer {{ id: '{contract.customerId}' }}),
                     (p:Product {{ id: '{contract.productId}' }})
@@ -231,6 +231,44 @@ namespace backend.Service
 
             var doc = await ExecuteCypherAsync(cypher);
             return doc.RootElement.GetProperty("results")[0].GetProperty("data").GetArrayLength() > 0;
+        }
+
+        // ------------------------------------------------------
+        // PUT /api/contracts/{id} → cập nhật toàn bộ thông tin hợp đồng
+        // ------------------------------------------------------
+        public async Task<Contract?> UpdateContractFullAsync(string id, Contract contract)
+        {
+            decimal commission = CalculateCommission(contract.contractValue, contract.commissionRate);
+            
+            var cypher = $@"
+                MATCH (:Customer)-[r:OWNS {{id:'{id}'}}]->(:Product)
+                SET r.purchaseDate = date('{contract.purchaseDate:yyyy-MM-dd}'),
+                    r.expiryDate = date('{contract.expiryDate:yyyy-MM-dd}'),
+                    r.status = '{contract.status}',
+                    r.contractValue = {contract.contractValue},
+                    r.commission = {commission},
+                    r.commissionRate = {contract.commissionRate}
+                RETURN r
+            ";
+
+            var doc = await ExecuteCypherAsync(cypher);
+            var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
+            if (data.GetArrayLength() == 0) return null;
+
+            var row = data[0].GetProperty("row")[0];
+            
+            return new Contract
+            {
+                id = row.GetProperty("id").GetString() ?? id,
+                customerId = contract.customerId,
+                productId = contract.productId,
+                purchaseDate = DateTime.Parse(row.GetProperty("purchaseDate").GetString() ?? DateTime.Now.ToString()),
+                expiryDate = DateTime.Parse(row.GetProperty("expiryDate").GetString() ?? DateTime.Now.ToString()),
+                status = row.GetProperty("status").GetString() ?? "",
+                contractValue = row.GetProperty("contractValue").GetDecimal(),
+                commission = row.GetProperty("commission").GetDecimal(),
+                commissionRate = row.GetProperty("commissionRate").GetDecimal()
+            };
         }
 
         // ------------------------------------------------------

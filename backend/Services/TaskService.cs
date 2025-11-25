@@ -72,11 +72,23 @@ namespace backend.Service
                 status: '{task.status}', 
                 type: '{task.type}', 
                 dueDate: datetime('{task.dueDate:O}'), 
-                createdDate: datetime('{task.createddate:O}'),
-                relatedContractId: '{task.relatedContractId}',
-                relatedProjectId: '{task.relatedProjectId}'
+                createddate: datetime('{task.createddate:O}'),
+                assignedToId: '{task.assignedToId ?? employeeId}',
+                relatedCustomerId: '{task.relatedCustomerId ?? ""}',
+                relatedContractId: '{task.relatedContractId ?? ""}',
+                relatedProjectId: '{task.relatedProjectId ?? ""}'
             }})
-            MERGE (e)-[:ASSIGNED_TO]->(t)
+            MERGE (e)-[:ASSIGNED_TO]->(t)";
+
+            if (!string.IsNullOrEmpty(task.relatedCustomerId))
+            {
+                cypher += $@"
+                WITH t
+                MATCH (c:Customer {{id:'{task.relatedCustomerId}'}})
+                MERGE (t)-[:RELATED_TO]->(c)";
+            }
+
+            cypher += @"
             RETURN t";
 
             var doc = await RunCypherAsync(cypher);
@@ -168,8 +180,10 @@ namespace backend.Service
                 t.status = '{task.status}',
                 t.type = '{task.type}',
                 t.dueDate = datetime('{task.dueDate:O}'),
-                t.relatedContractId = '{task.relatedContractId}',
-                t.relatedProjectId = '{task.relatedProjectId}'
+                t.assignedToId = '{task.assignedToId ?? ""}',
+                t.relatedCustomerId = '{task.relatedCustomerId ?? ""}',
+                t.relatedContractId = '{task.relatedContractId ?? ""}',
+                t.relatedProjectId = '{task.relatedProjectId ?? ""}'
             RETURN t";
 
             var doc = await RunCypherAsync(cypher);

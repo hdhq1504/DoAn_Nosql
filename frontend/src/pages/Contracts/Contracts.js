@@ -5,7 +5,6 @@ import {
   Button,
   Modal,
   Form,
-  Input,
   Select,
   DatePicker,
   InputNumber,
@@ -23,7 +22,6 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  FileTextOutlined,
   DollarOutlined,
   CheckCircleOutlined
 } from "@ant-design/icons";
@@ -103,7 +101,7 @@ export default function Contracts() {
       form.setFieldsValue({
         contractValue: product.price,
         commission: product.price * product.commissionRate,
-        duration: product.duration // Optional: auto-set duration if needed
+        duration: product.duration
       });
     }
   };
@@ -118,11 +116,15 @@ export default function Contracts() {
   const handleModalOk = () => {
     form.validateFields().then(async (values) => {
       try {
+        const { commission, ...restValues } = values;
+
+        const product = products.find(p => p.id === values.productId);
+
         const contractData = {
-          ...values,
+          ...restValues,
           purchaseDate: values.purchaseDate ? values.purchaseDate.toISOString() : null,
           expiryDate: values.expiryDate ? values.expiryDate.toISOString() : null,
-          commissionRate: selectedProduct ? selectedProduct.commissionRate : 0
+          commissionRate: product ? product.commissionRate : 0
         };
 
         if (editingContract) {

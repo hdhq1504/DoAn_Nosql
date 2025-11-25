@@ -10,8 +10,8 @@ namespace backend.Models
         public string type { get; set; } = null!;
         public DateTime dueDate { get; set; }
         public DateTime createddate { get; set; }
-        public Employee? assignedTo { get; set; }
-        public Customer? relatedCustomer { get; set; }
+        public string? assignedToId { get; set; }
+        public string? relatedCustomerId { get; set; }
         public string? relatedContractId { get; set; }
         public string? relatedProjectId { get; set; }
     }

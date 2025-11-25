@@ -78,14 +78,14 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
         <div className="logo-container">
           {!collapsed ? (
             <>
-              <div className="logo-icon">CRM</div>
+              <div className="logo-icon"></div>
               <div className="logo-text">
-                <h2>Dashboard</h2>
+                <h2>CRM</h2>
                 <p>Quản lý khách hàng</p>
               </div>
             </>
           ) : (
-            <div className="logo-icon-collapsed">C</div>
+            <div className="logo-icon-collapsed"></div>
           )}
         </div>
       </div>

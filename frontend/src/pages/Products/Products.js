@@ -119,7 +119,11 @@ export default function Products() {
         };
 
         if (editingProduct) {
-          await productAPI.update(editingProduct.id, productData);
+          // Include id in the payload for PATCH request
+          await productAPI.update(editingProduct.id, {
+            ...productData,
+            id: editingProduct.id
+          });
           message.success("Đã cập nhật sản phẩm");
         } else {
           await productAPI.create({

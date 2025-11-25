@@ -22,6 +22,7 @@ import {
   Timeline,
   Steps,
   message,
+  Tooltip,
 } from "antd";
 import {
   UserOutlined,
@@ -34,6 +35,7 @@ import {
   PlusOutlined,
   FileTextOutlined,
   CheckCircleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { customerAPI, contractAPI } from "../../services/api";
 import "./Customers.css";
@@ -77,7 +79,11 @@ function detailReducer(state, action) {
     case "SET_INTERACTIONS_LOADING":
       return { ...state, interactionsLoading: true, interactionsError: null };
     case "SET_INTERACTIONS_SUCCESS":
-      return { ...state, interactionsLoading: false, interactions: action.data };
+      return {
+        ...state,
+        interactionsLoading: false,
+        interactions: action.data,
+      };
     case "SET_INTERACTIONS_ERROR":
       return {
         ...state,
@@ -89,7 +95,11 @@ function detailReducer(state, action) {
     case "SET_CONTRACTS_SUCCESS":
       return { ...state, contractsLoading: false, contracts: action.data };
     case "SET_CONTRACTS_ERROR":
-      return { ...state, contractsLoading: false, contractsError: action.error };
+      return {
+        ...state,
+        contractsLoading: false,
+        contractsError: action.error,
+      };
     case "SET_JOURNEY_LOADING":
       return { ...state, journeyLoading: true, journeyError: null };
     case "SET_JOURNEY_SUCCESS":
@@ -117,10 +127,12 @@ export default function Customers() {
     detailReducer,
     detailInitialState
   );
+
   const [searchText, setSearchText] = useState("");
   const [filterSegment, setFilterSegment] = useState("all");
   const [filterRegion, setFilterRegion] = useState("all");
   const [filterPotential, setFilterPotential] = useState("all");
+
   const [form] = Form.useForm();
 
   const {
@@ -140,7 +152,6 @@ export default function Customers() {
     interactionDateRange,
   } = detailState;
 
-  // Fetch customers from API
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -160,7 +171,6 @@ export default function Customers() {
     }
   };
 
-  // Statistics
   const stats = {
     total: customers.length,
     vip: customers.filter((c) => c.segment === "VIP").length,
@@ -173,7 +183,6 @@ export default function Customers() {
     }).length,
   };
 
-  // Filter customers
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
       customer.name?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -184,10 +193,14 @@ export default function Customers() {
       filterSegment === "all" || customer.segment === filterSegment;
 
     const matchesRegion =
-      filterRegion === "all" || (customer.address && customer.address.includes(filterRegion));
+      filterRegion === "all" ||
+      (customer.address && customer.address.includes(filterRegion));
 
     const matchesPotential =
-      filterPotential === "all" || (filterPotential === "High" ? customer.lifetimevalue > 10000000 : customer.lifetimevalue <= 10000000);
+      filterPotential === "all" ||
+      (filterPotential === "High"
+        ? customer.lifetimevalue > 10000000
+        : customer.lifetimevalue <= 10000000);
 
     return matchesSearch && matchesSegment && matchesRegion && matchesPotential;
   });
@@ -198,7 +211,8 @@ export default function Customers() {
   ];
 
   const filteredInteractions = interactions.filter((item) => {
-    const matchesType = interactionType === "all" || item.type === interactionType;
+    const matchesType =
+      interactionType === "all" || item.type === interactionType;
     const matchesDate = interactionDateRange
       ? (() => {
         const date = dayjs(item.date);
@@ -211,156 +225,11 @@ export default function Customers() {
   });
 
   const currentJourneyStep = Math.max(
-    journey.findIndex((step) => step.status === "Current" || step.status === "In Progress"),
+    journey.findIndex(
+      (step) => step.status === "Current" || step.status === "In Progress"
+    ),
     0
   );
-
-  // Table columns
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 80,
-      fixed: "left",
-    },
-    {
-      title: "Tên khách hàng",
-      dataIndex: "name",
-      key: "name",
-      width: 180,
-      fixed: "left",
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Liên hệ",
-      key: "contact",
-      width: 200,
-      render: (_, record) => (
-        <div>
-          <div>{record.phone || "-"}</div>
-          <div style={{ fontSize: 12, color: "#8c8c8c" }}>
-            {record.email || "-"}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Loại",
-      dataIndex: "type",
-      key: "type",
-      width: 120,
-      filters: [
-        { text: "Cá nhân", value: "Cá nhân" },
-        { text: "Doanh nghiệp", value: "Doanh nghiệp" },
-      ],
-      onFilter: (value, record) => record.type === value,
-    },
-    {
-      title: "Phân khúc",
-      dataIndex: "segment",
-      key: "segment",
-      width: 130,
-      render: (segment) => {
-        let color = "blue";
-        if (segment === "VIP") color = "purple";
-        else if (segment === "Doanh nghiệp") color = "green";
-        return <Tag color={color}>{segment}</Tag>;
-      },
-      filters: [
-        { text: "VIP", value: "VIP" },
-        { text: "Doanh nghiệp", value: "Doanh nghiệp" },
-        { text: "Thường", value: "Thường" },
-      ],
-      onFilter: (value, record) => record.segment === value,
-    },
-    {
-      title: "Công ty",
-      dataIndex: "company",
-      key: "company",
-      width: 150,
-      render: (text) => text || "-",
-    },
-    {
-      title: "Địa chỉ",
-      dataIndex: "address",
-      key: "address",
-      width: 200,
-      ellipsis: true,
-    },
-    {
-      title: "Giá trị",
-      dataIndex: "lifetimevalue",
-      key: "lifetimevalue",
-      width: 130,
-      align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
-      sorter: (a, b) => (a.lifetimevalue || 0) - (b.lifetimevalue || 0),
-    },
-    {
-      title: "Đánh giá",
-      dataIndex: "satisfactionScore",
-      key: "satisfactionScore",
-      width: 100,
-      align: "center",
-      render: (score) => score || 0,
-      sorter: (a, b) =>
-        (a.satisfactionScore || 0) - (b.satisfactionScore || 0),
-    },
-    {
-      title: "Ngày tạo",
-      dataIndex: "createddate",
-      key: "createddate",
-      width: 120,
-      render: (date) =>
-        date ? dayjs(date).format("DD/MM/YYYY") : "-",
-      sorter: (a, b) =>
-        new Date(a.createddate || 0) - new Date(b.createddate || 0),
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      width: 230,
-      fixed: "right",
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            onClick={() => handleViewDetails(record)}
-            loading={
-              detailLoadingId === record.id && (interactionsLoading || journeyLoading)
-            }
-          >
-            Xem tương tác
-          </Button>
-          <Button
-            type="link"
-            onClick={() => handleViewDetails(record)}
-            loading={
-              detailLoadingId === record.id && (interactionsLoading || journeyLoading)
-            }
-          >
-            Xem hành trình
-          </Button>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Popconfirm
-            title="Xóa khách hàng"
-            description="Bạn có chắc muốn xóa khách hàng này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="link" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
 
   const handleEdit = (customer) => {
     setEditingCustomer(customer);
@@ -376,7 +245,7 @@ export default function Customers() {
     try {
       await customerAPI.delete(id);
       message.success("Xóa khách hàng thành công");
-      fetchCustomers(); // Refresh list
+      fetchCustomers();
     } catch (err) {
       console.error("Error deleting customer:", err);
       message.error("Lỗi khi xóa khách hàng");
@@ -392,7 +261,6 @@ export default function Customers() {
         data: response.data || [],
       });
     } catch (err) {
-      console.error("Error fetching interactions:", err);
       dispatchDetail({
         type: "SET_INTERACTIONS_ERROR",
         error: "Không thể tải lịch sử tương tác",
@@ -409,7 +277,6 @@ export default function Customers() {
         data: response.data || [],
       });
     } catch (err) {
-      console.error("Error fetching contracts:", err);
       dispatchDetail({
         type: "SET_CONTRACTS_ERROR",
         error: "Không thể tải lịch sử hợp đồng",
@@ -426,7 +293,6 @@ export default function Customers() {
         data: response.data || [],
       });
     } catch (err) {
-      console.error("Error fetching journey:", err);
       dispatchDetail({
         type: "SET_JOURNEY_ERROR",
         error: "Không thể tải hành trình khách hàng",
@@ -439,7 +305,7 @@ export default function Customers() {
     await Promise.all([
       fetchInteractions(customer.id),
       fetchContracts(customer.id),
-      fetchJourney(customer.id)
+      fetchJourney(customer.id),
     ]);
     dispatchDetail({ type: "FINISH_DETAIL_LOADING" });
   };
@@ -455,20 +321,21 @@ export default function Customers() {
       const values = await form.validateFields();
       const formattedValues = {
         ...values,
+        status: values.status || "Active",
+        satisfactionScore: values.satisfactionScore || 0,
+        lifetimevalue: values.lifetimevalue || 0,
         createddate: values.createddate
           ? values.createddate.toISOString()
-          : new Date().toISOString(),
+          : editingCustomer?.createddate || new Date().toISOString(),
         lastcontact: values.lastcontact
           ? values.lastcontact.toISOString()
-          : new Date().toISOString(),
+          : editingCustomer?.lastcontact || new Date().toISOString(),
       };
 
       if (editingCustomer) {
-        // Update existing customer
         await customerAPI.update(editingCustomer.id, formattedValues);
         message.success("Cập nhật khách hàng thành công");
       } else {
-        // Add new customer
         const newCustomer = {
           id: `C${Date.now()}`,
           ...formattedValues,
@@ -479,7 +346,7 @@ export default function Customers() {
 
       setIsModalOpen(false);
       form.resetFields();
-      fetchCustomers(); // Refresh list
+      fetchCustomers();
     } catch (err) {
       console.error("Error saving customer:", err);
       message.error("Lỗi khi lưu khách hàng");
@@ -491,13 +358,131 @@ export default function Customers() {
     form.resetFields();
   };
 
-  const handleDrawerClose = () => {
-    dispatchDetail({ type: "CLOSE_DRAWER" });
-  };
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: "8%",
+      sorter: (a, b) => (a.id || "").localeCompare(b.id || ""),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "name",
+      key: "name",
+      width: "20%",
+      render: (text, record) => (
+        <div>
+          <div style={{ fontWeight: 600 }}>{text}</div>
+          <div style={{ fontSize: 12, color: "#8c8c8c" }}>{record.company || "-"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Liên hệ",
+      key: "contact",
+      width: "20%",
+      render: (_, record) => (
+        <div>
+          <div>{record.phone || "-"}</div>
+          <div style={{ fontSize: 12, color: "#8c8c8c" }}>
+            {record.email || "-"}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Phân khúc",
+      dataIndex: "segment",
+      key: "segment",
+      width: "12%",
+      render: (segment) => {
+        let color = "blue";
+        if (segment === "VIP") color = "purple";
+        else if (segment === "Doanh nghiệp") color = "green";
+        return <Tag color={color}>{segment}</Tag>;
+      },
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: "15%",
+      ellipsis: true,
+    },
+    {
+      title: "Giá trị",
+      dataIndex: "lifetimevalue",
+      key: "lifetimevalue",
+      width: "12%",
+      align: "right",
+      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      sorter: (a, b) => (a.lifetimevalue || 0) - (b.lifetimevalue || 0),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: "12%",
+      align: "right",
+      render: (value) => <Tag color={value === "Active" ? "green" : "red"}>{value}</Tag>,
+      sorter: (a, b) => a.status.localeCompare(b.status),
+    },
+    {
+      title: "Thao tác",
+      key: "action",
+      width: "10%",
+      align: "center",
+      render: (_, record) => (
+        <Space size="small">
+          <Tooltip title="Xem chi tiết & Hành trình">
+            <Button
+              type="text"
+              icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+              onClick={() => handleViewDetails(record)}
+              loading={
+                detailLoadingId === record.id &&
+                (interactionsLoading || journeyLoading)
+              }
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Xóa khách hàng"
+            description="Bạn có chắc muốn xóa khách hàng này?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+          >
+            <Button type="text" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="customers-page">
-      <Title level={2}>Quản lý Khách hàng</Title>
+      <div className="customers-page__header">
+        <Title level={2} className="customers-page__title">
+          Quản lý Khách hàng
+        </Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+          size="large"
+        >
+          Thêm khách hàng
+        </Button>
+      </div>
 
       {error && (
         <Alert
@@ -510,10 +495,9 @@ export default function Customers() {
         />
       )}
 
-      {/* Statistics */}
-      <Row gutter={[16, 16]} className="stats-row">
+      <Row gutter={[16, 16]} className="customers-page__stats">
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="customers-page__stat-card">
             <Statistic
               title="Tổng khách hàng"
               value={stats.total}
@@ -523,7 +507,7 @@ export default function Customers() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="customers-page__stat-card">
             <Statistic
               title="VIP"
               value={stats.vip}
@@ -533,7 +517,7 @@ export default function Customers() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="customers-page__stat-card">
             <Statistic
               title="Doanh nhân"
               value={stats.business}
@@ -543,7 +527,7 @@ export default function Customers() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="customers-page__stat-card">
             <Statistic
               title="Khách hàng mới"
               value={stats.new}
@@ -554,19 +538,18 @@ export default function Customers() {
         </Col>
       </Row>
 
-      {/* Toolbar */}
-      <Card className="toolbar-card">
+      <Card className="customers-page__toolbar">
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={8}>
             <Input
-              placeholder="Tìm kiếm theo tên, email, số điện thoại..."
+              placeholder="Tìm kiếm theo tên, email, sđt..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               allowClear
             />
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={5}>
             <Select
               value={filterSegment}
               onChange={setFilterSegment}
@@ -578,19 +561,7 @@ export default function Customers() {
               <Option value="Thường">Thường</Option>
             </Select>
           </Col>
-          <Col xs={24} md={8} style={{ textAlign: "right" }}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-              size="large"
-            >
-              Thêm khách hàng
-            </Button>
-          </Col>
-        </Row>
-        <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={5}>
             <Select
               value={filterRegion}
               onChange={setFilterRegion}
@@ -603,7 +574,7 @@ export default function Customers() {
               <Option value="Đà Nẵng">Đà Nẵng</Option>
             </Select>
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={6}>
             <Select
               value={filterPotential}
               onChange={setFilterPotential}
@@ -619,30 +590,36 @@ export default function Customers() {
       </Card>
 
       <Drawer
-        title={`Hồ sơ khách hàng${selectedCustomer ? `: ${selectedCustomer.name}` : ""}`}
+        title={`Hồ sơ khách hàng${selectedCustomer ? `: ${selectedCustomer.name}` : ""
+          }`}
         width={800}
-        onClose={handleDrawerClose}
+        onClose={() => dispatchDetail({ type: "CLOSE_DRAWER" })}
         open={isDrawerOpen}
         destroyOnClose
       >
         {selectedCustomer && (
           <>
-            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+            <Row gutter={[16, 16]} className="customers-page__drawer-info">
               <Col span={12}>
-                <Card size="small" bordered={false}>
-                  <div style={{ fontWeight: 600 }}>{selectedCustomer.company || "Khách lẻ"}</div>
+                <Card size="small" bordered={false} style={{ background: "#fafafa" }}>
+                  <div style={{ fontWeight: 600 }}>
+                    {selectedCustomer.company || "Khách lẻ"}
+                  </div>
                   <div style={{ color: "#8c8c8c" }}>{selectedCustomer.email}</div>
                   <div style={{ color: "#8c8c8c" }}>{selectedCustomer.phone}</div>
                 </Card>
               </Col>
               <Col span={12}>
-                <Card size="small" bordered={false}>
+                <Card size="small" bordered={false} style={{ background: "#fafafa" }}>
                   <Space>
                     <Tag color="blue">{selectedCustomer.segment}</Tag>
                     <Tag>{selectedCustomer.type}</Tag>
                   </Space>
                   <div style={{ color: "#8c8c8c", marginTop: 4 }}>
-                    Ngày tạo: {selectedCustomer.createddate ? dayjs(selectedCustomer.createddate).format("DD/MM/YYYY") : "-"}
+                    Ngày tạo:{" "}
+                    {selectedCustomer.createddate
+                      ? dayjs(selectedCustomer.createddate).format("DD/MM/YYYY")
+                      : "-"}
                   </div>
                 </Card>
               </Col>
@@ -706,13 +683,22 @@ export default function Customers() {
                           <Timeline
                             mode="left"
                             items={filteredInteractions.map((item) => ({
-                              color: item.type === "Email" ? "blue" : item.type === "Call" ? "green" : "gray",
-                              label: item.date ? dayjs(item.date).format("DD/MM/YYYY") : "-",
+                              color:
+                                item.type === "Email"
+                                  ? "blue"
+                                  : item.type === "Call"
+                                    ? "green"
+                                    : "gray",
+                              label: item.date
+                                ? dayjs(item.date).format("DD/MM/YYYY")
+                                : "-",
                               children: (
                                 <div>
                                   <strong>{item.type || "Tương tác"}</strong>
                                   <div style={{ color: "#8c8c8c" }}>
-                                    {item.notes || item.description || "Không có ghi chú"}
+                                    {item.notes ||
+                                      item.description ||
+                                      "Không có ghi chú"}
                                   </div>
                                 </div>
                               ),
@@ -740,7 +726,11 @@ export default function Customers() {
                       )}
                       <Spin spinning={contractsLoading}>
                         {contracts.length === 0 ? (
-                          <Alert message="Chưa có hợp đồng nào" type="info" showIcon />
+                          <Alert
+                            message="Chưa có hợp đồng nào"
+                            type="info"
+                            showIcon
+                          />
                         ) : (
                           <Table
                             dataSource={contracts}
@@ -752,24 +742,30 @@ export default function Customers() {
                                 title: "Ngày mua",
                                 dataIndex: "purchaseDate",
                                 key: "purchaseDate",
-                                render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-"
+                                render: (date) =>
+                                  date ? dayjs(date).format("DD/MM/YYYY") : "-",
                               },
                               {
                                 title: "Giá trị",
                                 dataIndex: "contractValue",
                                 key: "contractValue",
-                                render: (val) => `₫${Number(val).toLocaleString("vi-VN")}`
+                                render: (val) =>
+                                  `₫${Number(val).toLocaleString("vi-VN")}`,
                               },
                               {
                                 title: "Trạng thái",
                                 dataIndex: "status",
                                 key: "status",
                                 render: (status) => (
-                                  <Tag color={status === "Active" ? "success" : "default"}>
+                                  <Tag
+                                    color={
+                                      status === "Active" ? "success" : "default"
+                                    }
+                                  >
                                     {status === "Active" ? "Hiệu lực" : status}
                                   </Tag>
-                                )
-                              }
+                                ),
+                              },
                             ]}
                           />
                         )}
@@ -793,7 +789,11 @@ export default function Customers() {
                       )}
                       <Spin spinning={journeyLoading}>
                         {journey.length === 0 ? (
-                          <Alert message="Không có dữ liệu hành trình" type="info" showIcon />
+                          <Alert
+                            message="Không có dữ liệu hành trình"
+                            type="info"
+                            showIcon
+                          />
                         ) : (
                           <Steps
                             direction="vertical"
@@ -811,12 +811,16 @@ export default function Customers() {
                                   {step.description || step.notes}
                                   {step.updatedAt && (
                                     <div style={{ marginTop: 4 }}>
-                                      Cập nhật: {dayjs(step.updatedAt).format("DD/MM/YYYY")}
+                                      Cập nhật:{" "}
+                                      {dayjs(step.updatedAt).format("DD/MM/YYYY")}
                                     </div>
                                   )}
                                 </div>
                               ),
-                              icon: step.status === "Completed" ? <CheckCircleOutlined /> : null
+                              icon:
+                                step.status === "Completed" ? (
+                                  <CheckCircleOutlined />
+                                ) : null,
                             }))}
                           />
                         )}
@@ -827,18 +831,18 @@ export default function Customers() {
               ]}
             />
           </>
-        )
-        }
+        )}
       </Drawer>
 
-      {/* Table */}
-      <Card>
+      {/* TABLE */}
+      <Card className="customers-page__table-card">
         <Spin spinning={loading}>
           <Table
+            className="customers-page__table"
             columns={columns}
             dataSource={filteredCustomers}
             rowKey="id"
-            scroll={{ x: 1500 }}
+            // Đã bỏ scroll props
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
@@ -848,7 +852,7 @@ export default function Customers() {
         </Spin>
       </Card>
 
-      {/* Modal */}
+      {/* MODAL: Đã khôi phục đầy đủ các trường */}
       <Modal
         title={editingCustomer ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
         open={isModalOpen}

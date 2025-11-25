@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { ConfigProvider, Layout } from "antd";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Topbar from "./components/Topbar/Topbar";
-import Login from "./pages/Login/Login";
-import { AuthProvider } from "./context/AuthContext";
-import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Customers from "./pages/Customers/Customers";
@@ -61,21 +58,11 @@ export default function App() {
         },
       }}
     >
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/*"
-              element={
-                <PrivateRoute>
-                  <MainLayout />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </Router>
-      </AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/*" element={<MainLayout />} />
+        </Routes>
+      </Router>
     </ConfigProvider>
   );
 }

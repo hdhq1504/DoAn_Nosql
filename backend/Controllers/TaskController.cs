@@ -30,26 +30,24 @@ namespace backend.Controllers
         // POST /api/tasks
         // ------------------------------------------------------
         [HttpPost]
-        public async System.Threading.Tasks.Task<IActionResult> CreateTask(string employeeId, [FromBody] backend.Models.Task task)
+        public async System.Threading.Tasks.Task<IActionResult> CreateTask([FromBody] backend.Models.Task task)
         {
-            // If employeeId is not provided in query string, try to find a default or return error
-            // For simplicity, we'll require it as a query parameter or default to a known admin ID if needed
-            // But better to keep it required.
-            if (string.IsNullOrEmpty(employeeId))
-                 // Fallback: if not in query, check if it's in the body (though model binding might not map it there easily without DTO)
-                 // For now, let's assume the frontend sends it as a query param ?employeeId=...
-                 return BadRequest(new { message = "employeeId là bắt buộc (query param)." });
-
             if (task == null)
                 return BadRequest(new { message = "Task không được để trống." });
+
+            if (string.IsNullOrEmpty(task.assignedToId))
+                return BadRequest(new { message = "assignedToId là bắt buộc." });
 
             if (string.IsNullOrEmpty(task.id))
                 task.id = "TASK" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
 
-            var createdTask = await _service.CreateTaskAsync(task, employeeId);
+            if (task.createddate == default(DateTime))
+                task.createddate = DateTime.UtcNow;
+
+            var createdTask = await _service.CreateTaskAsync(task, task.assignedToId);
 
             if (createdTask == null)
-                return BadRequest(new { message = "Tạo task thất bại. Kiểm tra employeeId hoặc dữ liệu task." });
+                return BadRequest(new { message = "Tạo task thất bại. Kiểm tra assignedToId hoặc dữ liệu task." });
 
             return Ok(createdTask);
         }
@@ -61,6 +59,8 @@ namespace backend.Controllers
         public async System.Threading.Tasks.Task<IActionResult> UpdateTask(string id, [FromBody] backend.Models.Task task)
         {
             if (task == null) return BadRequest("Dữ liệu task trống!");
+            
+            task.id = id;
             var updated = await _service.UpdateTaskAsync(id, task);
             if (updated == null) return NotFound($"Không tìm thấy task {id}");
             return Ok(updated);
