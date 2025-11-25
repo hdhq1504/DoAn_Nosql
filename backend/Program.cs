@@ -41,6 +41,7 @@ builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddScoped<AuthService>();
 
 // Cấu hình Swagger
 builder.Services.AddEndpointsApiExplorer();

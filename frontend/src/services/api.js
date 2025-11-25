@@ -124,4 +124,8 @@ export const notificationAPI = {
   delete: (id) => apiClient.delete(`/notification/${id}`),
 };
 
+export const authAPI = {
+  login: (credentials) => apiClient.post('/auth/login', credentials),
+};
+
 export default apiClient;

@@ -82,7 +82,6 @@ export default function Dashboard() {
       const inProgressCount = realTasks.filter(t => t.status === "In Progress").length;
       const completedCount = realTasks.filter(t => t.status === "Completed").length;
 
-      // Set main stats with growth percentages
       setStats({
         ...dashboardRes.data,
         totalTasks: realTasks.length,
@@ -92,7 +91,6 @@ export default function Dashboard() {
         employeeGrowth: 0.12,
       });
 
-      // Format revenue data for chart
       const formattedRevenue = revenueRes.data.map((item) => ({
         month: `T${item.month}`,
         revenue: Math.round(item.totalRevenue / 1000000),
@@ -100,14 +98,12 @@ export default function Dashboard() {
       }));
       setRevenueData(formattedRevenue);
 
-      // Mock task statistics (replace with real API if available)
       setTaskStats([
         { name: "Pending", value: pendingCount, color: COLORS.warning },
         { name: "In Progress", value: inProgressCount, color: COLORS.primary },
         { name: "Completed", value: completedCount, color: COLORS.success },
       ]);
 
-      // Top employees
       const formattedEmployees = employeeRes.data
         .sort((a, b) => b.totalRevenue - a.totalRevenue)
         .slice(0, 5)
@@ -118,27 +114,26 @@ export default function Dashboard() {
         }));
       setTopEmployees(formattedEmployees);
 
-      // Mock recent activities
       setRecentActivities([
         {
           type: "contract",
           customer: "Công ty TNHH ABC",
           action: "Ký hợp đồng mới",
-          amount: "₫280M",
+          amount: "280 Tr",
           time: "5 phút trước",
         },
         {
           type: "task",
           customer: "Nguyễn Văn An",
           action: "Hoàn thành tư vấn",
-          amount: "₫45M",
+          amount: "45 Tr",
           time: "15 phút trước",
         },
         {
           type: "lead",
           customer: "Trần Thị Bình",
           action: "Lead mới từ website",
-          amount: "Potential: ₫120M",
+          amount: "Potential: 120 Tr",
           time: "1 giờ trước",
         },
       ]);
@@ -150,7 +145,6 @@ export default function Dashboard() {
     }
   };
 
-  // Metric cards configuration
   const metricCards = [
     {
       title: "Tổng khách hàng",
@@ -162,7 +156,7 @@ export default function Dashboard() {
     },
     {
       title: "Doanh thu",
-      value: `₫${(stats.totalRevenue / 1000000).toFixed(1)}M`,
+      value: `${(stats.totalRevenue / 1000000).toFixed(1)} Tr`,
       growth: stats.revenueGrowth,
       icon: <DollarOutlined />,
       color: COLORS.success,
@@ -198,7 +192,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      {/* Header */}
       <div className="dashboard__header">
         <div>
           <Title level={2} style={{ margin: 0 }}>Dashboard</Title>
@@ -209,7 +202,6 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {/* Metric Cards */}
       <Row gutter={[24, 24]} className="dashboard__row dashboard__row--metrics">
         {metricCards.map((card, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
@@ -236,9 +228,7 @@ export default function Dashboard() {
         ))}
       </Row>
 
-      {/* Charts Row */}
       <Row gutter={[24, 24]} className="dashboard__row dashboard__row--charts">
-        {/* Revenue Trend */}
         <Col xs={24} lg={16}>
           <Card title="Doanh thu theo tháng" className="chart-card">
             <ResponsiveContainer width="100%" height={320}>
@@ -279,7 +269,6 @@ export default function Dashboard() {
           </Card>
         </Col>
 
-        {/* Task Distribution */}
         <Col xs={24} lg={8}>
           <Card title="Phân bố công việc" className="chart-card">
             <ResponsiveContainer width="100%" height={320}>
@@ -314,9 +303,7 @@ export default function Dashboard() {
         </Col>
       </Row>
 
-      {/* Employee Performance & Activities */}
       <Row gutter={[24, 24]} className="dashboard__row dashboard__row--content">
-        {/* Top Employees */}
         <Col xs={24} lg={14}>
           <Card
             title={
@@ -356,7 +343,6 @@ export default function Dashboard() {
           </Card>
         </Col>
 
-        {/* Recent Activities */}
         <Col xs={24} lg={10}>
           <Card
             title="Hoạt động gần đây"

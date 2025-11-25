@@ -236,15 +236,15 @@ export default function Employees() {
   if (loading) {
     return (
       <div className="employees-loading">
-        <Spin size="large" tip="Đang tải nhân viên...">
-          <div style={{ height: 200 }} />
+        <Spin size="large" tip="Đang tải...">
+          <div style={{ height: 200, width: "100%" }} />
         </Spin>
       </div>
     );
   }
 
   return (
-    <div className="employees-page-modern">
+    <div className="employees-page">
       {contextHolder}
       <div className="page-header">
         <Title level={2}>Quản lý Nhân viên</Title>

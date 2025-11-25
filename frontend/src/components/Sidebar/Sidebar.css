@@ -1,6 +1,5 @@
 @import "../../styles/variables.css";
 
-/* Custom Sidebar Styling */
 .sidebar-custom {
   background: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
@@ -13,7 +12,6 @@
   height: 100%;
 }
 
-/* Sidebar Header */
 .sidebar-header {
   padding: 20px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);

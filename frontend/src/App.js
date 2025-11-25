@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ConfigProvider, Layout } from "antd";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Topbar from "./components/Topbar/Topbar";
@@ -15,12 +15,23 @@ import Profile from "./pages/Profile/Profile";
 import Notifications from "./pages/Notifications/Notifications";
 import Employees from "./pages/Employees/Employees";
 import Contracts from "./pages/Contracts/Contracts";
+import Login from "./pages/Login/Login";
 
 const { Content } = Layout;
+
+function ProtectedRoute({ children }) {
+  const user = localStorage.getItem("user");
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
 function MainLayout() {
   const [page, setPage] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+
+  // Sync state with URL if needed, or just keep simple for now
 
   const renderPage = () => {
     switch (page) {
@@ -60,7 +71,15 @@ export default function App() {
     >
       <Router>
         <Routes>
-          <Route path="/*" element={<MainLayout />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </ConfigProvider>

@@ -416,16 +416,27 @@ export default function Customers() {
       key: "lifetimevalue",
       width: "12%",
       align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      render: (value) => `${(Number(value || 0) / 1000000).toLocaleString("vi-VN")} Tr`,
       sorter: (a, b) => (a.lifetimevalue || 0) - (b.lifetimevalue || 0),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: "12%",
+      width: "15%",
       align: "right",
-      render: (value) => <Tag color={value === "Active" ? "green" : "red"}>{value}</Tag>,
+      render: (value) => {
+        let color = "green";
+        let text = "Hoạt động";
+        if (value === "Inactive") {
+          color = "red";
+          text = "Ngưng hoạt động";
+        } else if (value === "Potential") {
+          color = "orange";
+          text = "Tiềm năng";
+        }
+        return <Tag color={color}>{text}</Tag>;
+      },
       sorter: (a, b) => a.status.localeCompare(b.status),
     },
     {
@@ -834,7 +845,6 @@ export default function Customers() {
         )}
       </Drawer>
 
-      {/* TABLE */}
       <Card className="customers-page__table-card">
         <Spin spinning={loading}>
           <Table
@@ -842,7 +852,6 @@ export default function Customers() {
             columns={columns}
             dataSource={filteredCustomers}
             rowKey="id"
-            // Đã bỏ scroll props
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
@@ -852,7 +861,6 @@ export default function Customers() {
         </Spin>
       </Card>
 
-      {/* MODAL: Đã khôi phục đầy đủ các trường */}
       <Modal
         title={editingCustomer ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
         open={isModalOpen}
@@ -948,7 +956,7 @@ export default function Customers() {
               <Form.Item name="status" label="Trạng thái">
                 <Select>
                   <Option value="Active">Hoạt động</Option>
-                  <Option value="Inactive">Ngừng hoạt động</Option>
+                  <Option value="Inactive">Ngưng hoạt động</Option>
                   <Option value="Potential">Tiềm năng</Option>
                 </Select>
               </Form.Item>

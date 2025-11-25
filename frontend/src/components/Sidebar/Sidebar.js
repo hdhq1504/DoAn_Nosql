@@ -25,27 +25,27 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
     {
       key: "customers",
       icon: <UserOutlined />,
-      label: "Quản lý Khách hàng",
+      label: "Khách hàng",
     },
     {
       key: "employees",
       icon: <TeamOutlined />,
-      label: "Quản lý Nhân viên",
+      label: "Nhân viên",
     },
     {
       key: "products",
       icon: <ShoppingOutlined />,
-      label: "Quản lý Sản phẩm",
+      label: "Sản phẩm",
     },
     {
       key: "contracts",
       icon: <FileTextOutlined />,
-      label: "Quản lý Hợp đồng",
+      label: "Hợp đồng",
     },
     {
       key: "tasks",
       icon: <CheckSquareOutlined />,
-      label: "Quản lý Công việc",
+      label: "Công việc",
     },
     {
       key: "notifications",
@@ -81,7 +81,7 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
               <div className="logo-icon"></div>
               <div className="logo-text">
                 <h2>CRM</h2>
-                <p>Quản lý khách hàng</p>
+                <p>Hệ thống quản lý CSKH</p>
               </div>
             </>
           ) : (

@@ -63,9 +63,7 @@ namespace backend.Service
                 );
         }
 
-        // --------------------------------
         // GET /api/products/{id} — Chi tiết sản phẩm
-        
         public async Task<Product?> GetProductByIdAsync(string id)
         {
             var cypher = $@"MATCH (p:Product {{id: '{id}'}}) RETURN p";
@@ -105,7 +103,7 @@ namespace backend.Service
             );
         }
 
-        // ✅ PATCH /api/products/{id} — cập nhật
+        // PATCH /api/products/{id} — cập nhật
         public async Task<Product?> UpdateProductAsync(string id, Product p)
         {
             var cypher = $@"
@@ -130,7 +128,7 @@ namespace backend.Service
             );
         }
 
-        // ✅ DELETE /api/products/{id}
+        // DELETE /api/products/{id}
         public async Task<bool> DeleteProductAsync(string id)
         {
             var cypher = $@"

@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
 import { API_BASE_URL, notificationAPI } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -35,7 +36,22 @@ const TYPE_CONFIG = {
 export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNotificationsClick }) {
   const [latest, setLatest] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [user, setUser] = useState(null);
   const baseApiUrl = useMemo(() => API_BASE_URL.replace(/\/api$/, ""), []);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    message.success("Đăng xuất thành công");
+    navigate("/login");
+  };
 
   const fetchLatest = useCallback(async () => {
     try {
@@ -44,7 +60,7 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
       setUnreadCount(response.data.summary?.unread || 0);
     } catch (error) {
       console.error("Failed to load latest notifications", error);
-      message.error("Không thể tải thông báo mới nhất");
+      // message.error("Không thể tải thông báo mới nhất");
     }
   }, []);
 
@@ -147,6 +163,7 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
       icon: <LogoutOutlined />,
       label: "Đăng xuất",
       danger: true,
+      onClick: handleLogout,
     },
   ];
 
@@ -188,10 +205,10 @@ export default function Topbar({ onProfileClick, collapsed, setCollapsed, onNoti
               />
               <div className="user-info-text">
                 <Text strong className="user-name">
-                  Admin
+                  {user ? user.Username : "Admin"}
                 </Text>
                 <Text type="secondary" className="user-role">
-                  Quản trị viên
+                  {user ? (user.RoleId === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Nhân viên') : "Quản trị viên"}
                 </Text>
               </div>
             </div>
