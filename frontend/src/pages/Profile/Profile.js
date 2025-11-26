@@ -1,327 +1,287 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
   Col,
   Avatar,
   Typography,
-  Descriptions,
   Button,
-  Modal,
   Form,
   Input,
   Upload,
   message,
   Divider,
   Tag,
-  Space,
 } from "antd";
 import {
   UserOutlined,
   MailOutlined,
   PhoneOutlined,
   EnvironmentOutlined,
-  EditOutlined,
   CameraOutlined,
-  SaveOutlined,
+  LockOutlined,
+  DeleteOutlined,
+  CopyOutlined,
+  CheckCircleFilled,
 } from "@ant-design/icons";
+import axios from "axios";
 import "./Profile.css";
 
 const { Title, Text } = Typography;
 
 export default function Profile() {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [form] = Form.useForm();
-
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    name: "Admin",
+    username: "",
     email: "admin@crm.com",
-    phone: "+84 123 456 789",
-    role: "Quản trị viên",
-    department: "Quản lý",
-    address: "123 Nguyễn Huệ, Q.1, TP.HCM",
-    joinDate: "01/01/2023",
-    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
-    bio: "Quản trị viên hệ thống CRM với hơn 5 năm kinh nghiệm trong lĩnh vực quản lý khách hàng và phát triển kinh doanh.",
+    phone: "",
+    address: "",
+    bio: "",
+    avatar: "",
+    roleId: "",
   });
 
-  const handleEditProfile = () => {
-    form.setFieldsValue(userInfo);
-    setIsEditModalOpen(true);
-  };
+  const API_URL = "http://localhost:5096/api";
 
-  const handleSaveProfile = () => {
-    form.validateFields().then((values) => {
-      setUserInfo({ ...userInfo, ...values });
-      setIsEditModalOpen(false);
-      message.success("Cập nhật thông tin thành công!");
-    });
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const email = "admin@crm.com";
+        const response = await axios.get(`${API_URL}/user/${email}`);
+        const data = response.data;
 
-  const handleCancelEdit = () => {
-    setIsEditModalOpen(false);
-    form.resetFields();
-  };
+        setUserInfo({
+          username: data.username || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          address: data.address || "",
+          bio: data.bio || "",
+          avatar: data.avatar || "",
+          roleId: data.roleId || "",
+        });
 
-  const uploadProps = {
-    name: "avatar",
-    showUploadList: false,
-    beforeUpload: (file) => {
-      const isImage = file.type.startsWith("image/");
-      if (!isImage) {
-        message.error("Chỉ được tải lên file ảnh!");
+        form.setFieldsValue({
+          username: data.username,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          bio: data.bio,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // message.error("Không thể tải thông tin người dùng");
       }
-      return false; // Prevent auto upload
-    },
+    };
+
+    fetchUserData();
+  }, [form]);
+
+  const handleSaveProfile = async (values) => {
+    setLoading(true);
+    try {
+      const updatedUser = {
+        ...userInfo,
+        ...values,
+      };
+
+      await axios.put(`${API_URL}/user/${userInfo.email}`, updatedUser);
+      setUserInfo(updatedUser);
+      message.success("Cập nhật thông tin thành công!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      message.error("Lỗi khi cập nhật thông tin");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUploadAvatar = async ({ file }) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post(`${API_URL}/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const avatarUrl = response.data.url;
+
+      setUserInfo((prev) => ({ ...prev, avatar: avatarUrl }));
+
+      await axios.put(`${API_URL}/user/${userInfo.email}`, {
+        ...userInfo,
+        avatar: avatarUrl,
+      });
+
+      message.success("Cập nhật ảnh đại diện thành công!");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      message.error("Lỗi khi tải ảnh lên");
+    }
   };
 
   return (
     <div className="profile-page-modern">
-      <Title level={2}>Hồ sơ cá nhân</Title>
+      <div className="profile-header-container">
+        <Title level={2} style={{ margin: 0 }}>Hồ sơ cá nhân</Title>
+      </div>
 
-      <Row gutter={[24, 24]}>
+      <Row gutter={[32, 32]}>
         {/* Left Column - Profile Card */}
         <Col xs={24} lg={8}>
-          <Card className="profile-card">
+          <Card className="profile-card" bordered={false}>
             <div className="profile-avatar-section">
               <div className="avatar-wrapper">
-                <Avatar size={120} src={userInfo.avatar} icon={<UserOutlined />} />
-                <div className="avatar-upload-overlay">
-                  <Upload {...uploadProps}>
-                    <Button
-                      type="primary"
-                      shape="circle"
-                      icon={<CameraOutlined />}
-                      size="large"
-                    />
-                  </Upload>
-                </div>
+                <Avatar
+                  size={120}
+                  src={userInfo.avatar}
+                  icon={<UserOutlined />}
+                  className="profile-avatar"
+                />
+                <Upload
+                  showUploadList={false}
+                  customRequest={handleUploadAvatar}
+                  accept="image/*"
+                >
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<CameraOutlined />}
+                    className="avatar-upload-btn"
+                  />
+                </Upload>
               </div>
-              <Title level={3} style={{ marginTop: 16, marginBottom: 4 }}>
-                {userInfo.name}
+
+              <Title level={4} style={{ marginTop: 16, marginBottom: 4 }}>
+                {userInfo.username}
               </Title>
-              <Tag color="blue" style={{ fontSize: 14 }}>
-                {userInfo.role}
-              </Tag>
-              <Text type="secondary" style={{ marginTop: 12, display: "block" }}>
-                {userInfo.bio}
-              </Text>
+              <Text type="secondary">{userInfo.email}</Text>
+
+              <div style={{ marginTop: 8 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Đăng nhập lần cuối: 4 minutes ago</Text>
+              </div>
+
+              <div className="user-id-box">
+                <Text type="secondary" ellipsis style={{ maxWidth: 150 }}>
+                  User ID: {userInfo.email}
+                </Text>
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  size="small"
+                  onClick={() => {
+                    navigator.clipboard.writeText(userInfo.email);
+                    message.success("Copied!");
+                  }}
+                >
+                  Sao chép
+                </Button>
+              </div>
             </div>
 
             <Divider />
 
-            <div className="profile-stats">
-              <Row gutter={16}>
-                <Col span={12}>
-                  <div className="stat-item">
-                    <Text strong style={{ fontSize: 24, color: "#1890ff" }}>
-                      2,847
-                    </Text>
-                    <Text type="secondary">Khách hàng</Text>
-                  </div>
-                </Col>
-                <Col span={12}>
-                  <div className="stat-item">
-                    <Text strong style={{ fontSize: 24, color: "#52c41a" }}>
-                      156
-                    </Text>
-                    <Text type="secondary">Hợp đồng</Text>
-                  </div>
+            <div className="profile-actions">
+              <div className="action-item">
+                <LockOutlined />
+                <Text>Đổi mật khẩu</Text>
+              </div>
+              <div className="action-item delete">
+                <DeleteOutlined />
+                <Text type="danger">Xóa tài khoản</Text>
+              </div>
+            </div>
+          </Card>
+        </Col>
+
+        {/* Right Column - Details Form */}
+        <Col xs={24} lg={16}>
+          <div className="details-section">
+            <Title level={4} style={{ marginBottom: 24 }}>Thông tin cá nhân</Title>
+
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSaveProfile}
+              requiredMark={false}
+            >
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item
+                    name="username"
+                    label="Full Name"
+                    rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+                  >
+                    <Input size="large" prefix={<UserOutlined className="field-icon" />} />
+                  </Form.Item>
                 </Col>
               </Row>
-            </div>
 
-            <Divider />
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item
+                    name="email"
+                    label="Email"
+                    rules={[
+                      { required: true, message: "Vui lòng nhập email" },
+                      { type: "email", message: "Email không hợp lệ" },
+                    ]}
+                  >
+                    <Input
+                      size="large"
+                      prefix={<MailOutlined className="field-icon" />}
+                      suffix={<Tag color="success" icon={<CheckCircleFilled />}>Đã xác nhận</Tag>}
+                      disabled
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              block
-              size="large"
-              onClick={handleEditProfile}
-            >
-              Chỉnh sửa hồ sơ
-            </Button>
-          </Card>
-        </Col>
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item name="phone" label="Phone Number">
+                    <Input size="large" prefix={<PhoneOutlined className="field-icon" />} />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        {/* Right Column - Details */}
-        <Col xs={24} lg={16}>
-          <Card title="Thông tin chi tiết" className="details-card">
-            <Descriptions column={{ xs: 1, sm: 2 }} bordered>
-              <Descriptions.Item
-                label={
-                  <Space>
-                    <UserOutlined />
-                    Họ và tên
-                  </Space>
-                }
-                span={2}
-              >
-                {userInfo.name}
-              </Descriptions.Item>
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item name="address" label="Address">
+                    <Input size="large" prefix={<EnvironmentOutlined className="field-icon" />} />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Descriptions.Item
-                label={
-                  <Space>
-                    <MailOutlined />
-                    Email
-                  </Space>
-                }
-              >
-                {userInfo.email}
-              </Descriptions.Item>
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item name="bio" label="Bio">
+                    <Input.TextArea rows={4} showCount maxLength={500} />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Descriptions.Item
-                label={
-                  <Space>
-                    <PhoneOutlined />
-                    Số điện thoại
-                  </Space>
-                }
-              >
-                {userInfo.phone}
-              </Descriptions.Item>
+              <Divider />
 
-              <Descriptions.Item label="Phòng ban">
-                {userInfo.department}
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Chức vụ">
-                <Tag color="blue">{userInfo.role}</Tag>
-              </Descriptions.Item>
-
-              <Descriptions.Item
-                label={
-                  <Space>
-                    <EnvironmentOutlined />
-                    Địa chỉ
-                  </Space>
-                }
-                span={2}
-              >
-                {userInfo.address}
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Ngày tham gia" span={2}>
-                {userInfo.joinDate}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-
-          <Card
-            title="Hoạt động gần đây"
-            style={{ marginTop: 24 }}
-            className="activity-card"
-          >
-            <div className="activity-list">
-              <div className="activity-item">
-                <div className="activity-dot" style={{ background: "#52c41a" }} />
-                <div className="activity-content">
-                  <Text strong>Thêm khách hàng mới</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Nguyễn Văn An - 2 giờ trước
-                  </Text>
-                </div>
+              <div className="form-actions">
+                <Button size="large" className="btn-cancel">
+                  Hủy
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  loading={loading}
+                  className="btn-save"
+                >
+                  Lưu
+                </Button>
               </div>
-              <div className="activity-item">
-                <div className="activity-dot" style={{ background: "#1890ff" }} />
-                <div className="activity-content">
-                  <Text strong>Cập nhật chiến dịch</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Chiến dịch Q4 2024 - 5 giờ trước
-                  </Text>
-                </div>
-              </div>
-              <div className="activity-item">
-                <div className="activity-dot" style={{ background: "#faad14" }} />
-                <div className="activity-content">
-                  <Text strong>Hoàn thành công việc</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Gọi điện tư vấn - 1 ngày trước
-                  </Text>
-                </div>
-              </div>
-              <div className="activity-item">
-                <div className="activity-dot" style={{ background: "#722ed1" }} />
-                <div className="activity-content">
-                  <Text strong>Tạo báo cáo</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Báo cáo KPI tháng 11 - 2 ngày trước
-                  </Text>
-                </div>
-              </div>
-            </div>
-          </Card>
+            </Form>
+          </div>
         </Col>
       </Row>
-
-      {/* Edit Modal */}
-      <Modal
-        title="Chỉnh sửa hồ sơ"
-        open={isEditModalOpen}
-        onOk={handleSaveProfile}
-        onCancel={handleCancelEdit}
-        width={600}
-        okText={
-          <Space>
-            <SaveOutlined />
-            Lưu thay đổi
-          </Space>
-        }
-        cancelText="Hủy"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Họ và tên"
-            rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
-          >
-            <Input prefix={<UserOutlined />} />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[
-                  { required: true, message: "Vui lòng nhập email" },
-                  { type: "email", message: "Email không hợp lệ" },
-                ]}
-              >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="phone" label="Số điện thoại">
-                <Input prefix={<PhoneOutlined />} />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="department" label="Phòng ban">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="role" label="Chức vụ">
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item name="address" label="Địa chỉ">
-            <Input prefix={<EnvironmentOutlined />} />
-          </Form.Item>
-
-          <Form.Item name="bio" label="Giới thiệu">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }

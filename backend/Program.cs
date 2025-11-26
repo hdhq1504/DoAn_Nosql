@@ -42,6 +42,7 @@ builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 
 // Cấu hình Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -68,6 +69,8 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // Mở Swagger tại /
     });
 }
+
+app.UseStaticFiles();
 
 // Sử dụng CORS (phải đặt trước UseHttpsRedirection)
 app.UseCors("AllowReactApp");

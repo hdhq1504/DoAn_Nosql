@@ -9,5 +9,11 @@ namespace backend.Models
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public string RoleId { get; set; }
+        
+        // Profile fields
+        public string? Avatar { get; set; }
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
+        public string? Bio { get; set; }
     }
 }

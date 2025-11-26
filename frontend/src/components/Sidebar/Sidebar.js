@@ -58,6 +58,11 @@ export default function Sidebar({ page, setPage, collapsed, setCollapsed }) {
       label: "Chiến dịch",
     },
     {
+      key: "users",
+      icon: <TeamOutlined />,
+      label: "Thành viên",
+    },
+    {
       key: "reports",
       icon: <BarChartOutlined />,
       label: "Báo cáo",

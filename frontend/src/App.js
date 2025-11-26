@@ -17,6 +17,8 @@ import Employees from "./pages/Employees/Employees";
 import Contracts from "./pages/Contracts/Contracts";
 import Login from "./pages/Login/Login";
 
+import Users from "./pages/Users/Users";
+
 const { Content } = Layout;
 
 function ProtectedRoute({ children }) {
@@ -45,6 +47,7 @@ function MainLayout() {
       case "contracts": return <Contracts />;
       case "profile": return <Profile />;
       case "notifications": return <Notifications />;
+      case "users": return <Users />;
       default: return <Dashboard />;
     }
   };
