@@ -76,5 +76,5 @@
    - Ứng dụng được cấu hình chạy trên port 3001 (xem scripts trong `package.json`)
 
 ### Đăng nhập hệ thống
-   - Tài khoản: `admin@gmail.com`
+   - Tài khoản: `admin@crm.vn`
    - Mật khẩu: `123456`

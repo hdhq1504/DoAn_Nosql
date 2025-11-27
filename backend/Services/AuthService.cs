@@ -40,11 +40,9 @@ namespace backend.Service
 
         public async Task<User?> LoginAsync(string email, string password)
         {
-            // Note: In a real app, passwords should be hashed. 
-            // Here we assume plain text for simplicity as per request "login from DB" without registration logic details.
             var cypher = $@"
-                MATCH (u:User {{Email: '{email}', Password: '{password}'}})
-                WHERE u.RoleId = 'ROLE_ADMIN' OR (u)-[:HAS_ROLE]->(:Role {{Id: 'ROLE_ADMIN'}})
+                MATCH (u:User {{email: '{email}', password: '{password}'}})
+                WHERE u.roleId = 'ROLE01' OR (u)-[:HAS_ROLE]->(:Role {{id: 'ROLE01'}})
                 RETURN u";
 
             var doc = await RunCypherAsync(cypher);
