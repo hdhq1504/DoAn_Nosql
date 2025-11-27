@@ -177,5 +177,40 @@ namespace backend.Service
 
             return (users, total);
         }
+
+        public async Task<User?> CreateUserAsync(User user)
+        {
+            // Determine Role Name based on ID
+            string roleName = "User";
+            if (user.RoleId == "ROLE01") roleName = "Admin";
+            else if (user.RoleId == "ROLE02") roleName = "Manager";
+            else if (user.RoleId == "ROLE03") roleName = "Employee";
+
+            var cypher = $@"
+                CREATE (u:User {{
+                    Id: '{user.Id}',
+                    Username: '{user.Username}',
+                    Email: '{user.Email}',
+                    Password: '{user.Password}',
+                    Avatar: '{user.Avatar}',
+                    RoleId: '{user.RoleId}',
+                    Status: '{user.Status}',
+                    CreatedAt: datetime()
+                }})
+                WITH u
+                MATCH (r:Role {{id: '{user.RoleId}'}})
+                MERGE (u)-[:HAS_ROLE]->(r)
+                RETURN u";
+
+            var doc = await RunCypherAsync(cypher);
+            var results = doc.RootElement.GetProperty("results");
+            if (results.GetArrayLength() == 0) return null;
+
+            var data = results[0].GetProperty("data");
+            if (data.GetArrayLength() == 0) return null;
+
+            var row = data[0].GetProperty("row")[0];
+            return JsonSerializer.Deserialize<User>(row.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
     }
 }

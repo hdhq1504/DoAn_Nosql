@@ -31,6 +31,7 @@ import {
   TrophyOutlined,
 } from "@ant-design/icons";
 import { campaignAPI, customerAPI } from "../../services/api";
+import { generateNextId } from "../../utils/idGenerator";
 import "./Campaigns.css";
 import dayjs from "dayjs";
 
@@ -67,7 +68,6 @@ export default function Campaigns() {
     fetchCampaigns();
   }, []);
 
-  // Statistics
   const stats = {
     total: campaigns.length,
     active: campaigns.filter((c) => c.status === "Active").length,
@@ -111,7 +111,7 @@ export default function Campaigns() {
       title: "Loại",
       dataIndex: "type",
       key: "type",
-      width: 120,
+      width: 100,
     },
     {
       title: "Trạng thái",
@@ -143,18 +143,18 @@ export default function Campaigns() {
       title: "Ngân sách",
       dataIndex: "budget",
       key: "budget",
-      width: 130,
+      width: 170,
       align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      render: (value) => `${Number(value || 0).toLocaleString("vi-VN")} VNĐ`,
       sorter: (a, b) => (a.budget || 0) - (b.budget || 0),
     },
     {
       title: "Đã chi",
       dataIndex: "spent",
       key: "spent",
-      width: 130,
+      width: 170,
       align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      render: (value) => `${Number(value || 0).toLocaleString("vi-VN")} VNĐ`,
       sorter: (a, b) => (a.spent || 0) - (b.spent || 0),
     },
     {
@@ -172,7 +172,7 @@ export default function Campaigns() {
       title: "Leads",
       dataIndex: "leads",
       key: "leads",
-      width: 80,
+      width: 110,
       align: "center",
       sorter: (a, b) => (a.leads || 0) - (b.leads || 0),
     },
@@ -180,7 +180,7 @@ export default function Campaigns() {
       title: "Chuyển đổi",
       dataIndex: "conversions",
       key: "conversions",
-      width: 100,
+      width: 120,
       align: "center",
       sorter: (a, b) => (a.conversions || 0) - (b.conversions || 0),
     },
@@ -188,9 +188,9 @@ export default function Campaigns() {
       title: "Doanh thu",
       dataIndex: "actualRevenue",
       key: "actualRevenue",
-      width: 130,
+      width: 170,
       align: "right",
-      render: (value) => `₫${Number(value || 0).toLocaleString("vi-VN")}`,
+      render: (value) => `${Number(value || 0).toLocaleString("vi-VN")} VNĐ`,
       sorter: (a, b) => (a.actualRevenue || 0) - (b.actualRevenue || 0),
     },
     {
@@ -228,7 +228,6 @@ export default function Campaigns() {
       endDate: campaign.endDate ? dayjs(campaign.endDate) : null,
     });
 
-    // Fetch target customers
     try {
       const res = await campaignAPI.getTargetCustomers(campaign.id);
       setSelectedCustomerIds(res.data.map(c => c.id));
@@ -253,6 +252,8 @@ export default function Campaigns() {
     setEditingCampaign(null);
     setSelectedCustomerIds([]);
     form.resetFields();
+    const nextId = generateNextId(campaigns, "CAM", 3);
+    form.setFieldsValue({ id: nextId, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -261,11 +262,15 @@ export default function Campaigns() {
       try {
         const formattedValues = {
           ...values,
-          startDate: values.startDate ? values.startDate.toISOString() : null,
-          endDate: values.endDate ? values.endDate.toISOString() : null,
+          startDate: values.startDate ? values.startDate.format("YYYY-MM-DD") : null,
+          endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : null,
         };
 
         let campaignId = editingCampaign?.id;
+
+        if (!campaignId && !formattedValues.id) {
+          formattedValues.id = generateNextId(campaigns, "CAM", 3);
+        }
 
         if (editingCampaign) {
           await campaignAPI.update(editingCampaign.id, formattedValues);
@@ -273,13 +278,11 @@ export default function Campaigns() {
         } else {
           const res = await campaignAPI.create({
             ...formattedValues,
-            id: `CAM${Date.now()}`
           });
           campaignId = res.data.id;
           message.success("Đã thêm chiến dịch mới");
         }
 
-        // Assign customers
         if (selectedCustomerIds.length > 0 && campaignId) {
           await campaignAPI.assignCustomers(campaignId, selectedCustomerIds);
         }
@@ -290,6 +293,8 @@ export default function Campaigns() {
       } catch (error) {
         message.error("Có lỗi xảy ra");
       }
+    }).catch((info) => {
+      console.log("Validate Failed:", info);
     });
   };
 
@@ -303,8 +308,8 @@ export default function Campaigns() {
   if (loading) {
     return (
       <div className="campaigns-loading">
-        <Spin size="large" tip="Đang tải chiến dịch...">
-          <div style={{ height: 200 }} />
+        <Spin size="large" tip="Đang tải...">
+          <div style={{ height: "100vh" }} />
         </Spin>
       </div>
     );
@@ -314,7 +319,6 @@ export default function Campaigns() {
     <div className="campaigns-page-modern" >
       <Title level={2}>Quản lý Chiến dịch</Title>
 
-      {/* Statistics */}
       <Row gutter={[16, 16]} className="stats-row" >
         <Col xs={24} sm={12} lg={6}>
           <Card>
@@ -342,7 +346,7 @@ export default function Campaigns() {
               title="Tổng ngân sách"
               value={formatMoney(stats.totalBudget)}
               prefix={<DollarOutlined />}
-              suffix="₫"
+              suffix="VNĐ"
               valueStyle={{ color: "#722ed1" }}
             />
           </Card>
@@ -353,14 +357,13 @@ export default function Campaigns() {
               title="Đã chi tiêu"
               value={formatMoney(stats.totalSpent)}
               prefix={<DollarOutlined />}
-              suffix="₫"
+              suffix="VNĐ"
               valueStyle={{ color: "#fa8c16" }}
             />
           </Card>
         </Col>
       </Row >
 
-      {/* Toolbar */}
       < Card className="toolbar-card" >
         <Row justify="space-between" align="middle">
           <Col>
@@ -381,7 +384,6 @@ export default function Campaigns() {
         </Row>
       </Card >
 
-      {/* Table */}
       < Card className="table-card" >
         <Table
           columns={columns}
@@ -396,7 +398,6 @@ export default function Campaigns() {
         />
       </Card >
 
-      {/* Modal */}
       < Modal
         title={editingCampaign ? "Chỉnh sửa chiến dịch" : "Thêm chiến dịch mới"}
         open={isModalOpen}
@@ -408,6 +409,16 @@ export default function Campaigns() {
       >
         <Form form={form} layout="vertical">
           <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="id"
+                label="Mã chiến dịch"
+                hidden
+                rules={[{ required: true, message: "Vui lòng nhập mã chiến dịch" }]}
+              >
+                <Input disabled={!!editingCampaign} />
+              </Form.Item>
+            </Col>
             <Col span={24}>
               <Form.Item
                 name="name"
@@ -443,7 +454,7 @@ export default function Campaigns() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="budget" label="Ngân sách (₫)">
+              <Form.Item name="budget" label="Ngân sách (VNĐ)">
                 <InputNumber
                   style={{ width: "100%" }}
                   formatter={(value) =>
@@ -457,7 +468,7 @@ export default function Campaigns() {
 
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="spent" label="Đã chi (₫)">
+              <Form.Item name="spent" label="Đã chi (VNĐ)">
                 <InputNumber
                   style={{ width: "100%" }}
                   formatter={(value) =>
@@ -515,7 +526,7 @@ export default function Campaigns() {
               optionFilterProp="children"
               filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
               options={customers.map(c => ({
-                label: `${c.name} (${c.segment || 'Thường'}) - ${c.region || 'N/A'}`,
+                label: `${c.name} (${c.segment || 'Thường'})`,
                 value: c.id
               }))}
             />
@@ -524,8 +535,8 @@ export default function Campaigns() {
           <div style={{ marginTop: 24 }}>
             <Title level={5}><TrophyOutlined /> Hiệu quả chiến dịch</Title>
             <Row gutter={16}>
-              <Col span={8}>
-                <Form.Item name="actualRevenue" label="Doanh thu thực tế (₫)">
+              <Col span={12}>
+                <Form.Item name="actualRevenue" label="Doanh thu thực tế (VNĐ)">
                   <InputNumber
                     style={{ width: "100%" }}
                     formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}

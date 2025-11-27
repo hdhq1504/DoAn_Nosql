@@ -36,6 +36,7 @@ import {
 import { taskAPI, employeeAPI, customerAPI, contractAPI } from "../../services/api";
 import "./Tasks.css";
 import dayjs from "dayjs";
+import { generateNextId } from "../../utils/idGenerator";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -145,6 +146,8 @@ export default function Tasks() {
   const handleAdd = () => {
     setEditingTask(null);
     form.resetFields();
+    const nextId = generateNextId(tasks, "T", 6);
+    form.setFieldsValue({ id: nextId, status: "Pending", priority: "Medium" });
     setIsModalOpen(true);
   };
 
@@ -159,6 +162,12 @@ export default function Tasks() {
           relatedCustomerId: values.relatedCustomer,
         };
 
+        let taskId = editingTask?.id;
+
+        if (!taskId && !formattedValues.id) {
+          formattedValues.id = generateNextId(tasks, "T", 6);
+        }
+
         delete formattedValues.assignedTo;
         delete formattedValues.relatedCustomer;
         delete formattedValues.createdDate;
@@ -169,7 +178,6 @@ export default function Tasks() {
         } else {
           await taskAPI.create({
             ...formattedValues,
-            id: `TASK${Date.now()}`
           });
           message.success("Đã thêm công việc mới");
         }
@@ -359,7 +367,7 @@ export default function Tasks() {
                                 )}
                                 {task.relatedContractId && (
                                   <Tag color="purple">
-                                    HĐ: {task.relatedContractId}
+                                    Mã HĐ: {task.relatedContractId}
                                   </Tag>
                                 )}
                               </Space>
@@ -463,8 +471,20 @@ export default function Tasks() {
         width={700}
         okText="Lưu"
         cancelText="Hủy"
+        destroyOnClose
       >
         <Form form={form} layout="vertical">
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="id"
+                label="Mã công việc"
+                hidden
+              >
+                <Input disabled />
+              </Form.Item>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -569,6 +589,11 @@ export default function Tasks() {
 
           <Row gutter={16}>
             <Col span={12}>
+              <Form.Item name="createdDate" label="Ngày tạo">
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
               <Form.Item
                 name="dueDate"
                 label="Ngày hết hạn"
@@ -577,16 +602,10 @@ export default function Tasks() {
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item name="createdDate" label="Ngày tạo">
-                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-              </Form.Item>
-            </Col>
           </Row>
         </Form>
       </Modal>
 
-      {/* Stats Modal */}
       <Modal
         title="Hiệu suất nhân viên"
         open={isStatsOpen}

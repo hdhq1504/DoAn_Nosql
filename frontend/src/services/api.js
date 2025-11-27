@@ -53,7 +53,9 @@ export const customerAPI = {
   update: (id, data) => apiClient.patch(`/customer/${id}`, data),
   delete: (id) => apiClient.delete(`/customer/${id}`),
   getInteractions: (id) => apiClient.get(`/customer/interactions/${id}`),
+  addInteraction: (id, data) => apiClient.post(`/customer/interactions/${id}`, data),
   getJourney: (id) => apiClient.get(`/customer/journey/${id}`),
+  addJourneyStage: (id, data) => apiClient.post(`/customer/journey/${id}`, data),
 };
 
 // Product API

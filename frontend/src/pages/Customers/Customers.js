@@ -23,6 +23,8 @@ import {
   Steps,
   message,
   Tooltip,
+  Progress,
+  InputNumber,
 } from "antd";
 import {
   UserOutlined,
@@ -38,6 +40,7 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { customerAPI, contractAPI } from "../../services/api";
+import { generateNextId } from "../../utils/idGenerator";
 import "./Customers.css";
 import dayjs from "dayjs";
 
@@ -138,7 +141,6 @@ export default function Customers() {
   const {
     selectedCustomer,
     isDrawerOpen,
-    detailLoadingId,
     interactions,
     contracts,
     journey,
@@ -224,12 +226,7 @@ export default function Customers() {
     return matchesType && matchesDate;
   });
 
-  const currentJourneyStep = Math.max(
-    journey.findIndex(
-      (step) => step.status === "Current" || step.status === "In Progress"
-    ),
-    0
-  );
+  const currentJourneyStep = journey.length > 0 ? journey.length - 1 : 0;
 
   const handleEdit = (customer) => {
     setEditingCustomer(customer);
@@ -313,6 +310,8 @@ export default function Customers() {
   const handleAdd = () => {
     setEditingCustomer(null);
     form.resetFields();
+    const nextId = generateNextId(customers, "C", 6);
+    form.setFieldsValue({ id: nextId, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -322,8 +321,8 @@ export default function Customers() {
       const formattedValues = {
         ...values,
         status: values.status || "Active",
-        satisfactionScore: values.satisfactionScore || 0,
-        lifetimevalue: values.lifetimevalue || 0,
+        satisfactionScore: values.satisfactionScore !== undefined ? values.satisfactionScore : (editingCustomer?.satisfactionScore || 0),
+        lifetimevalue: values.lifetimevalue !== undefined ? values.lifetimevalue : (editingCustomer?.lifetimevalue || 0),
         createddate: values.createddate
           ? values.createddate.toISOString()
           : editingCustomer?.createddate || new Date().toISOString(),
@@ -337,7 +336,6 @@ export default function Customers() {
         message.success("Cập nhật khách hàng thành công");
       } else {
         const newCustomer = {
-          id: `C${Date.now()}`,
           ...formattedValues,
         };
         await customerAPI.create(newCustomer);
@@ -363,25 +361,39 @@ export default function Customers() {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      width: "8%",
+      width: 80,
       sorter: (a, b) => (a.id || "").localeCompare(b.id || ""),
     },
     {
       title: "Khách hàng",
       dataIndex: "name",
       key: "name",
-      width: "20%",
-      render: (text, record) => (
+      width: 200,
+      render: (text) => (
         <div>
           <div style={{ fontWeight: 600 }}>{text}</div>
-          <div style={{ fontSize: 12, color: "#8c8c8c" }}>{record.company || "-"}</div>
         </div>
+      ),
+    },
+    {
+      title: "Loại & Phân khúc",
+      key: "type_segment",
+      width: 180,
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Tag color={record.type === "Doanh nghiệp" ? "blue" : "cyan"}>
+            {record.type}
+          </Tag>
+          <Tag color={record.segment === "VIP" ? "gold" : record.segment === "Doanh nghiệp" ? "purple" : "default"} style={{ marginTop: 4 }}>
+            {record.segment}
+          </Tag>
+        </Space>
       ),
     },
     {
       title: "Liên hệ",
       key: "contact",
-      width: "20%",
+      width: 200,
       render: (_, record) => (
         <div>
           <div>{record.phone || "-"}</div>
@@ -392,45 +404,58 @@ export default function Customers() {
       ),
     },
     {
-      title: "Phân khúc",
-      dataIndex: "segment",
-      key: "segment",
-      width: "12%",
-      render: (segment) => {
-        let color = "blue";
-        if (segment === "VIP") color = "purple";
-        else if (segment === "Doanh nghiệp") color = "green";
-        return <Tag color={color}>{segment}</Tag>;
-      },
-    },
-    {
-      title: "Địa chỉ",
-      dataIndex: "address",
-      key: "address",
-      width: "15%",
-      ellipsis: true,
-    },
-    {
       title: "Giá trị",
       dataIndex: "lifetimevalue",
       key: "lifetimevalue",
-      width: "12%",
+      width: 150,
       align: "right",
-      render: (value) => `${(Number(value || 0) / 1000000).toLocaleString("vi-VN")} Tr`,
+      render: (value) => `${Number(value || 0).toLocaleString("vi-VN")} VNĐ`,
       sorter: (a, b) => (a.lifetimevalue || 0) - (b.lifetimevalue || 0),
+    },
+    {
+      title: "Điểm hài lòng",
+      dataIndex: "satisfactionScore",
+      key: "satisfactionScore",
+      width: 120,
+      align: "center",
+      render: (score) => (
+        <div style={{ textAlign: 'center' }}>
+          <Progress
+            type="circle"
+            percent={score * 10}
+            format={() => score}
+            width={30}
+            strokeColor={score >= 8 ? "#52c41a" : score >= 5 ? "#faad14" : "#ff4d4f"}
+          />
+        </div>
+      ),
+      sorter: (a, b) => (a.satisfactionScore || 0) - (b.satisfactionScore || 0),
+    },
+    {
+      title: "Ngày tạo & Liên hệ",
+      key: "dates",
+      width: 150,
+      render: (_, record) => (
+        <div style={{ fontSize: 13 }}>
+          <div>Tạo: {record.createddate ? dayjs(record.createddate).format("DD/MM/YYYY") : "-"}</div>
+          <div style={{ color: "#8c8c8c" }}>
+            LH: {record.lastcontact ? dayjs(record.lastcontact).format("DD/MM/YYYY") : "-"}
+          </div>
+        </div>
+      ),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: "15%",
-      align: "right",
+      width: 120,
+      align: "center",
       render: (value) => {
         let color = "green";
         let text = "Hoạt động";
         if (value === "Inactive") {
           color = "red";
-          text = "Ngưng hoạt động";
+          text = "Ngưng";
         } else if (value === "Potential") {
           color = "orange";
           text = "Tiềm năng";
@@ -442,19 +467,16 @@ export default function Customers() {
     {
       title: "Thao tác",
       key: "action",
-      width: "10%",
+      width: 100,
       align: "center",
+      fixed: "right",
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="Xem chi tiết & Hành trình">
+          <Tooltip title="Xem chi tiết">
             <Button
               type="text"
               icon={<EyeOutlined style={{ color: "#1890ff" }} />}
               onClick={() => handleViewDetails(record)}
-              loading={
-                detailLoadingId === record.id &&
-                (interactionsLoading || journeyLoading)
-              }
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
@@ -465,8 +487,7 @@ export default function Customers() {
             />
           </Tooltip>
           <Popconfirm
-            title="Xóa khách hàng"
-            description="Bạn có chắc muốn xóa khách hàng này?"
+            title="Xóa?"
             onConfirm={() => handleDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
@@ -551,7 +572,7 @@ export default function Customers() {
 
       <Card className="customers-page__toolbar">
         <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} md={8}>
+          <Col xs={24} md={12}>
             <Input
               placeholder="Tìm kiếm theo tên, email, sđt..."
               prefix={<SearchOutlined />}
@@ -560,7 +581,7 @@ export default function Customers() {
               allowClear
             />
           </Col>
-          <Col xs={24} md={5}>
+          <Col xs={24} md={6}>
             <Select
               value={filterSegment}
               onChange={setFilterSegment}
@@ -570,19 +591,6 @@ export default function Customers() {
               <Option value="VIP">VIP</Option>
               <Option value="Doanh nghiệp">Doanh nghiệp</Option>
               <Option value="Thường">Thường</Option>
-            </Select>
-          </Col>
-          <Col xs={24} md={5}>
-            <Select
-              value={filterRegion}
-              onChange={setFilterRegion}
-              style={{ width: "100%" }}
-              placeholder="Lọc theo khu vực"
-            >
-              <Option value="all">Tất cả khu vực</Option>
-              <Option value="Hà Nội">Hà Nội</Option>
-              <Option value="Hồ Chí Minh">Hồ Chí Minh</Option>
-              <Option value="Đà Nẵng">Đà Nẵng</Option>
             </Select>
           </Col>
           <Col xs={24} md={6}>
@@ -717,6 +725,48 @@ export default function Customers() {
                           />
                         )}
                       </Spin>
+
+                      <div style={{ marginTop: 16, borderTop: "1px solid #f0f0f0", paddingTop: 16 }}>
+                        <Title level={5}>Thêm tương tác mới</Title>
+                        <Form
+                          layout="vertical"
+                          onFinish={async (values) => {
+                            try {
+                              const newInteraction = {
+                                ...values,
+                                id: `INT${Date.now()}`,
+                                date: new Date().toISOString(),
+                              };
+                              await customerAPI.addInteraction(selectedCustomer.id, newInteraction);
+                              message.success("Đã thêm tương tác");
+                              fetchInteractions(selectedCustomer.id);
+                            } catch (error) {
+                              message.error("Lỗi khi thêm tương tác");
+                            }
+                          }}
+                        >
+                          <Row gutter={16}>
+                            <Col span={12}>
+                              <Form.Item name="type" label="Loại" rules={[{ required: true }]}>
+                                <Select>
+                                  <Option value="Call">Gọi điện</Option>
+                                  <Option value="Email">Email</Option>
+                                  <Option value="Meeting">Gặp mặt</Option>
+                                  <Option value="Other">Khác</Option>
+                                </Select>
+                              </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                              <Form.Item name="description" label="Mô tả" rules={[{ required: true }]}>
+                                <Input />
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                          <Button type="primary" htmlType="submit">
+                            Thêm tương tác
+                          </Button>
+                        </Form>
+                      </div>
                     </>
                   ),
                 },
@@ -839,6 +889,7 @@ export default function Customers() {
                     </>
                   ),
                 },
+
               ]}
             />
           </>
@@ -866,27 +917,33 @@ export default function Customers() {
         open={isModalOpen}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={800}
+        width={700}
         okText="Lưu"
         cancelText="Hủy"
+        destroyOnClose
       >
         <Form form={form} layout="vertical">
+          <Form.Item
+            name="id"
+            label="Mã khách hàng"
+            hidden
+            rules={[{ required: true, message: "Vui lòng nhập mã khách hàng" }]}
+          >
+            <Input disabled />
+          </Form.Item>
+
           <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="id"
-                label="ID"
-                rules={[{ required: true, message: "Vui lòng nhập ID" }]}
-              >
-                <Input disabled={!!editingCustomer} />
-              </Form.Item>
-            </Col>
             <Col span={12}>
               <Form.Item
                 name="name"
                 label="Tên khách hàng"
-                rules={[{ required: true, message: "Vui lòng nhập tên" }]}
+                rules={[{ required: true, message: "Vui lòng nhập tên khách hàng" }]}
               >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="address" label="Địa chỉ">
                 <Input />
               </Form.Item>
             </Col>
@@ -918,18 +975,7 @@ export default function Customers() {
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="company" label="Công ty">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="address" label="Địa chỉ">
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
+
 
           <Row gutter={16}>
             <Col span={12}>
@@ -970,13 +1016,23 @@ export default function Customers() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="lifetimevalue" label="Giá trị (₫)">
-                <Input type="number" />
+              <Form.Item name="lifetimevalue" label="Giá trị (VNĐ)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="satisfactionScore" label="Điểm hài lòng">
-                <Input type="number" min={0} max={10} step={0.1} />
+              <Form.Item
+                name="satisfactionScore"
+                label="Điểm hài lòng"
+                rules={[
+                  { type: "number", min: 0, max: 10, message: "Điểm phải từ 0 đến 10" }
+                ]}
+              >
+                <InputNumber min={0} max={10} step={0.1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
           </Row>
@@ -990,6 +1046,6 @@ export default function Customers() {
           </Row>
         </Form>
       </Modal>
-    </div>
+    </div >
   );
 }

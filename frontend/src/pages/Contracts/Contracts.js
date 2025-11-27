@@ -16,7 +16,8 @@ import {
   Row,
   Col,
   Statistic,
-  Popconfirm
+  Popconfirm,
+  Input
 } from "antd";
 import {
   PlusOutlined,
@@ -26,6 +27,7 @@ import {
   CheckCircleOutlined
 } from "@ant-design/icons";
 import { contractAPI, customerAPI, productAPI } from "../../services/api";
+import { generateNextId } from "../../utils/idGenerator";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -68,6 +70,8 @@ export default function Contracts() {
     setEditingContract(null);
     setSelectedProduct(null);
     form.resetFields();
+    const nextId = generateNextId(contracts, "CT", 6);
+    form.setFieldsValue({ id: nextId, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -133,7 +137,6 @@ export default function Contracts() {
         } else {
           await contractAPI.create({
             ...contractData,
-            id: `CONT${Date.now()}`,
             status: "Active"
           });
           message.success("Đã tạo hợp đồng mới");
@@ -176,14 +179,14 @@ export default function Contracts() {
       dataIndex: "contractValue",
       key: "contractValue",
       align: "right",
-      render: (val) => `₫${Number(val).toLocaleString("vi-VN")}`
+      render: (val) => `${Number(val).toLocaleString("vi-VN")} VNĐ`
     },
     {
       title: "Hoa hồng",
       dataIndex: "commission",
       key: "commission",
       align: "right",
-      render: (val) => <Text type="success">₫{Number(val).toLocaleString("vi-VN")}</Text>
+      render: (val) => <Text type="success">{Number(val).toLocaleString("vi-VN")} VNĐ</Text>
     },
     {
       title: "Ngày mua",
@@ -241,7 +244,7 @@ export default function Contracts() {
               value={totalValue}
               prefix={<DollarOutlined />}
               precision={0}
-              formatter={(val) => `₫${Number(val).toLocaleString("vi-VN")}`}
+              formatter={(val) => `${Number(val).toLocaleString("vi-VN")} VNĐ`}
               valueStyle={{ color: "#1890ff" }}
             />
           </Card>
@@ -253,7 +256,7 @@ export default function Contracts() {
               value={totalCommission}
               prefix={<DollarOutlined />}
               precision={0}
-              formatter={(val) => `₫${Number(val).toLocaleString("vi-VN")}`}
+              formatter={(val) => `${Number(val).toLocaleString("vi-VN")} VNĐ`}
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
@@ -293,7 +296,25 @@ export default function Contracts() {
         width={700}
       >
         <Form form={form} layout="vertical">
+          <Form.Item
+            name="id"
+            label="Mã hợp đồng"
+            hidden
+            rules={[{ required: true, message: "Vui lòng nhập mã hợp đồng" }]}
+          >
+            <Input disabled />
+          </Form.Item>
+          
           <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="contractName"
+                label="Tên hợp đồng"
+                rules={[{ required: true, message: "Vui lòng nhập tên hợp đồng" }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
             <Col span={12}>
               <Form.Item
                 name="customerId"
@@ -307,6 +328,9 @@ export default function Contracts() {
                 </Select>
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="productId"
@@ -320,9 +344,6 @@ export default function Contracts() {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="purchaseDate"
@@ -332,6 +353,9 @@ export default function Contracts() {
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="expiryDate"
@@ -340,9 +364,6 @@ export default function Contracts() {
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="contractValue"
@@ -357,6 +378,9 @@ export default function Contracts() {
                 />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="commission"
@@ -370,16 +394,17 @@ export default function Contracts() {
                 />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item name="status" label="Trạng thái">
+                <Select>
+                  <Option value="Active">Hiệu lực</Option>
+                  <Option value="Expired">Hết hạn</Option>
+                  <Option value="Pending">Chờ duyệt</Option>
+                  <Option value="Cancelled">Đã hủy</Option>
+                </Select>
+              </Form.Item>
+            </Col>
           </Row>
-
-          <Form.Item name="status" label="Trạng thái">
-            <Select>
-              <Option value="Active">Hiệu lực</Option>
-              <Option value="Expired">Hết hạn</Option>
-              <Option value="Pending">Chờ duyệt</Option>
-              <Option value="Cancelled">Đã hủy</Option>
-            </Select>
-          </Form.Item>
         </Form>
       </Modal>
     </div>

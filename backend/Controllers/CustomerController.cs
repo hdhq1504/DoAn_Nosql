@@ -109,5 +109,16 @@ namespace backend.Controllers
             var journey = await _service.GetCustomerJourneyAsync(id);
             return Ok(journey);
         }
+
+        // ------------------------------------------------------
+        // POST /api/customers/journey/{id}
+        // ------------------------------------------------------
+        [HttpPost("journey/{id}")]
+        public async Task<IActionResult> AddJourneyStage(string id, [FromBody] Journey journey)
+        {
+            var created = await _service.AddJourneyStageAsync(id, journey);
+            if (created == null) return BadRequest("Failed to add journey stage.");
+            return CreatedAtAction(nameof(GetCustomerJourney), new { id }, created);
+        }
     }
 }

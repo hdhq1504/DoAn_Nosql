@@ -29,6 +29,7 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import { productAPI } from "../../services/api";
+import { generateNextId } from "../../utils/idGenerator";
 import "./Products.css";
 
 const { Title, Text } = Typography;
@@ -62,7 +63,6 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  // Statistics
   const stats = {
     total: products.length,
     active: products.filter((p) => p.status === "Active").length,
@@ -70,7 +70,6 @@ export default function Products() {
     totalValue: products.reduce((sum, p) => sum + (p.price || 0), 0),
   };
 
-  // Filter products
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -89,7 +88,7 @@ export default function Products() {
     setEditingProduct(product);
     form.setFieldsValue({
       ...product,
-      commissionRate: product.commissionRate * 100 // Convert back to percentage for display
+      commissionRate: product.commissionRate * 100
     });
     setIsModalOpen(true);
   };
@@ -107,6 +106,8 @@ export default function Products() {
   const handleAdd = () => {
     setEditingProduct(null);
     form.resetFields();
+    const nextId = generateNextId(products, "P", 3);
+    form.setFieldsValue({ id: nextId, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -115,11 +116,10 @@ export default function Products() {
       try {
         const productData = {
           ...values,
-          commissionRate: values.commissionRate / 100 // Convert to decimal
+          commissionRate: values.commissionRate / 100
         };
 
         if (editingProduct) {
-          // Include id in the payload for PATCH request
           await productAPI.update(editingProduct.id, {
             ...productData,
             id: editingProduct.id
@@ -128,7 +128,6 @@ export default function Products() {
         } else {
           await productAPI.create({
             ...productData,
-            id: `PROD${Date.now()}` // Generate ID if backend doesn't
           });
           message.success("Đã thêm sản phẩm mới");
         }
@@ -159,10 +158,19 @@ export default function Products() {
   }
 
   return (
-    <div className="products-page-modern">
-      <Title level={2}>Quản lý Sản phẩm</Title>
+    <div className="products-page">
+      <div className="products-page__header">
+        <Title level={2}>Quản lý Sản phẩm</Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+          size="large"
+        >
+          Thêm sản phẩm
+        </Button>
+      </div>
 
-      {/* Statistics */}
       <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} sm={12} lg={6}>
           <Card>
@@ -200,78 +208,56 @@ export default function Products() {
               title="Tổng giá trị"
               value={formatMoney(stats.totalValue)}
               prefix={<DollarOutlined />}
-              suffix="₫"
+              suffix="VNĐ"
               valueStyle={{ color: "#722ed1" }}
             />
           </Card>
         </Col>
       </Row>
 
-      {/* Toolbar */}
       <Card className="toolbar-card">
         <Row gutter={[16, 16]} align="middle">
-          <Col flex="auto">
-            <Space size="middle" wrap>
-              <Input
-                placeholder="Tìm kiếm sản phẩm..."
-                prefix={<SearchOutlined />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 250 }}
-                allowClear
-              />
-              <Select
-                value={filterCategory}
-                onChange={setFilterCategory}
-                style={{ width: 150 }}
-              >
-                <Option value="all">Tất cả loại</Option>
-                <Option value="Bảo hiểm">Bảo hiểm</Option>
-                <Option value="Đầu tư">Đầu tư</Option>
-                <Option value="Tư vấn">Tư vấn</Option>
-              </Select>
-              <Select
-                value={filterStatus}
-                onChange={setFilterStatus}
-                style={{ width: 150 }}
-              >
-                <Option value="all">Tất cả trạng thái</Option>
-                <Option value="Active">Hoạt động</Option>
-                <Option value="Inactive">Ngừng</Option>
-              </Select>
-            </Space>
+          <Col xs={24} md={12}>
+            <Input
+              placeholder="Tìm kiếm sản phẩm..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+            />
           </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-              size="large"
+          <Col xs={24} md={6}>
+            <Select
+              value={filterCategory}
+              onChange={setFilterCategory}
+              style={{ width: "100%" }}
             >
-              Thêm sản phẩm
-            </Button>
+              <Option value="all">Tất cả loại</Option>
+              <Option value="Bảo hiểm">Bảo hiểm</Option>
+              <Option value="Đầu tư">Đầu tư</Option>
+              <Option value="Tư vấn">Tư vấn</Option>
+            </Select>
+          </Col>
+          <Col xs={24} md={6}>
+            <Select
+              value={filterStatus}
+              onChange={setFilterStatus}
+              style={{ width: "100%" }}
+            >
+              <Option value="all">Tất cả trạng thái</Option>
+              <Option value="Active">Hoạt động</Option>
+              <Option value="Inactive">Ngừng</Option>
+            </Select>
           </Col>
         </Row>
       </Card>
 
-      {/* Products Grid */}
       <Row gutter={[16, 16]}>
         {filteredProducts.map((product) => (
           <Col xs={24} sm={12} lg={8} xl={6} key={product.id}>
             <Card
               hoverable
-              className="product-card-modern"
-              cover={
-                <div className="product-image-wrapper">
-                  <Image
-                    alt={product.name}
-                    src={product.image || "https://via.placeholder.com/200?text=Product"}
-                    fallback="https://via.placeholder.com/200?text=Product"
-                    preview={false}
-                    style={{ height: 200, objectFit: "cover" }}
-                  />
-                </div>
-              }
+              className="product-card"
               actions={[
                 <Button
                   type="text"
@@ -306,7 +292,7 @@ export default function Products() {
                   <div>
                     <Text type="secondary">Giá: </Text>
                     <Text strong style={{ color: "#52c41a", fontSize: 16 }}>
-                      ₫{formatMoney(product.price)}
+                      {formatMoney(product.price)} VNĐ
                     </Text>
                   </div>
                   <div>
@@ -341,7 +327,6 @@ export default function Products() {
         </Card>
       )}
 
-      {/* Modal */}
       <Modal
         title={editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
         open={isModalOpen}
@@ -352,6 +337,15 @@ export default function Products() {
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
+          <Form.Item
+            name="id"
+            label="Mã sản phẩm"
+            hidden
+            rules={[{ required: true, message: "Vui lòng nhập mã sản phẩm" }]}
+          >
+            <Input disabled />
+          </Form.Item>
+
           <Form.Item
             name="name"
             label="Tên sản phẩm"
@@ -382,7 +376,7 @@ export default function Products() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="price" label="Giá (₫)">
+              <Form.Item name="price" label="Giá (VNĐ)">
                 <InputNumber
                   style={{ width: "100%" }}
                   formatter={(value) =>
@@ -408,10 +402,6 @@ export default function Products() {
               formatter={(value) => `${value}%`}
               parser={(value) => value.replace("%", "")}
             />
-          </Form.Item>
-
-          <Form.Item name="image" label="URL hình ảnh">
-            <Input placeholder="https://..." />
           </Form.Item>
 
           <Form.Item name="description" label="Mô tả">

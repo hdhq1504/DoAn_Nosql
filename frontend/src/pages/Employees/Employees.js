@@ -30,6 +30,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 import { employeeAPI } from "../../services/api";
+import { generateNextId } from "../../utils/idGenerator";
 import dayjs from "dayjs";
 import "./Employees.css";
 
@@ -84,6 +85,8 @@ export default function Employees() {
   const handleAdd = () => {
     setEditingEmployee(null);
     form.resetFields();
+    const nextId = generateNextId(employees, "E", 4);
+    form.setFieldsValue({ id: nextId, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -102,7 +105,6 @@ export default function Employees() {
         } else {
           const newEmployee = {
             ...formattedValues,
-            id: `EMP${Date.now()}`,
           };
           await employeeAPI.create(newEmployee);
           messageApi.success("Đã thêm nhân viên mới");
@@ -192,9 +194,10 @@ export default function Employees() {
         <div style={{ textAlign: 'center' }}>
           <Progress
             type="circle"
-            percent={score}
+            percent={score * 10}
+            format={() => score}
             width={40}
-            strokeColor={score >= 80 ? "#52c41a" : score >= 50 ? "#faad14" : "#ff4d4f"}
+            strokeColor={score >= 8 ? "#52c41a" : score >= 5 ? "#faad14" : "#ff4d4f"}
           />
         </div>
       ),
@@ -289,6 +292,18 @@ export default function Employees() {
       >
         <Form form={form} layout="vertical">
           <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="id"
+                label="Mã nhân viên"
+                hidden
+                rules={[{ required: true, message: "Vui lòng nhập mã nhân viên" }]}
+              >
+                <Input disabled={!!editingEmployee} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="name"
@@ -354,8 +369,14 @@ export default function Employees() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="performanceScore" label="Điểm hiệu suất">
-                <InputNumber min={0} max={100} style={{ width: "100%" }} />
+              <Form.Item
+                name="performanceScore"
+                label="Điểm hiệu suất"
+                rules={[
+                  { type: "number", min: 0, max: 10, message: "Điểm phải từ 0 đến 10" }
+                ]}
+              >
+                <InputNumber min={0} max={10} step={0.1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
           </Row>

@@ -28,7 +28,16 @@ namespace backend.Controllers
         {
             var updatedUser = await _userService.UpdateUserAsync(email, user);
             if (updatedUser == null) return NotFound();
+            if (updatedUser == null) return NotFound();
             return Ok(updatedUser);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] User user)
+        {
+            var createdUser = await _userService.CreateUserAsync(user);
+            if (createdUser == null) return BadRequest("Failed to create user.");
+            return CreatedAtAction(nameof(GetUser), new { email = createdUser.Email }, createdUser);
         }
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string search = "", [FromQuery] string role = "")

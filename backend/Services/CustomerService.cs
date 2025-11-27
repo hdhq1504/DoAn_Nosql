@@ -160,7 +160,6 @@ namespace backend.Service
                 address: '{customer.address}',
                 status: '{customer.status}',
                 segment: '{customer.segment}',
-                company: {(string.IsNullOrEmpty(customer.company) ? "null" : $"'{customer.company}'")},
                 createddate: datetime('{createdDateStr}'),
                 lifetimeValue: {customer.lifetimevalue},
                 lastcontact: datetime('{lastContactStr}'),
@@ -191,7 +190,6 @@ namespace backend.Service
                 c.address = '{updatedCustomer.address}',
                 c.status = '{updatedCustomer.status}',
                 c.segment = '{updatedCustomer.segment}',
-                c.company = {(string.IsNullOrEmpty(updatedCustomer.company) ? "null" : $"'{updatedCustomer.company}'")},
                 c.lifetimevalue = {updatedCustomer.lifetimevalue},
                 c.satisfactionScore = {updatedCustomer.satisfactionScore},
                 c.lastcontact = datetime('{lastContactStr}'),
@@ -236,6 +234,27 @@ namespace backend.Service
             if (data.GetArrayLength() == 0) return null;
 
             return JsonSerializer.Deserialize<Interaction>(data[0].GetProperty("row")[0].GetRawText());
+        }
+
+        // Thêm giai đoạn hành trình mới (POST)
+        public async Task<Journey?> AddJourneyStageAsync(string customerId, Journey journey)
+        {
+            var cypher = $@"
+            MATCH (c:Customer {{id: '{customerId}'}})
+            CREATE (j:Journey {{
+                step: '{journey.step}',
+                detail: '{journey.detail}',
+                date: datetime()
+            }})
+            CREATE (c)-[:HAS_JOURNEY]->(j)
+            RETURN j";
+
+            var doc = await RunCypherAsync(cypher);
+            var data = doc.RootElement.GetProperty("results")[0].GetProperty("data");
+
+            if (data.GetArrayLength() == 0) return null;
+
+            return JsonSerializer.Deserialize<Journey>(data[0].GetProperty("row")[0].GetRawText());
         }
     }
 }

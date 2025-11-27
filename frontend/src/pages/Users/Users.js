@@ -11,8 +11,11 @@ import {
   Dropdown,
   message,
   Modal,
-  Select
+  Select,
+  Form
 } from "antd";
+import { generateNextId } from "../../utils/idGenerator";
+import { employeeAPI } from "../../services/api";
 import {
   PlusOutlined,
   DownloadOutlined,
@@ -32,6 +35,7 @@ const { confirm } = Modal;
 export default function Users() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [users, setUsers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [current, setCurrent] = useState(1);
@@ -40,6 +44,9 @@ export default function Users() {
 
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [form] = Form.useForm();
 
   const API_URL = "https://localhost:5001/api";
 
@@ -100,8 +107,47 @@ export default function Users() {
   };
 
   const handleEdit = (record) => {
-    message.info(`Chức năng sửa cho ${record.username} đang được phát triển`);
-    // Implement edit modal here
+    setEditingUser(record);
+    form.setFieldsValue(record);
+    setIsModalOpen(true);
+  };
+
+  const handleAdd = async () => {
+    setEditingUser(null);
+    form.resetFields();
+    const nextId = generateNextId(users, "U", 4);
+    form.setFieldsValue({ id: nextId, status: "Active" });
+
+    try {
+      const res = await employeeAPI.getAll();
+      setEmployees(res.data || []);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+
+    setIsModalOpen(true);
+  };
+
+  const handleModalOk = async () => {
+    try {
+      const values = await form.validateFields();
+      if (editingUser) {
+        await axios.put(`${API_URL}/user/${editingUser.id}`, values);
+        message.success("Cập nhật người dùng thành công");
+      } else {
+        await axios.post(`${API_URL}/user`, values);
+        message.success("Thêm người dùng thành công");
+      }
+      setIsModalOpen(false);
+      fetchUsers(current, pageSize, searchText, roleFilter);
+    } catch (error) {
+      console.error("Error saving user:", error);
+      message.error("Lỗi khi lưu người dùng");
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
   };
 
   const columns = [
@@ -147,10 +193,15 @@ export default function Users() {
         let color = "default";
         let label = roleName || record.roleId || "User";
 
-        if (label.includes("Admin") || record.roleId === "ROLE_ADMIN") {
-          color = "green";
-        } else if (label.includes("User") || record.roleId === "ROLE_USER") {
+        if (record.roleId === "ROLE01") {
+          color = "red";
+          label = "Admin";
+        } else if (record.roleId === "ROLE02") {
+          color = "gold";
+          label = "Quản lý";
+        } else if (record.roleId === "ROLE03") {
           color = "blue";
+          label = "Nhân viên";
         }
 
         return (
@@ -208,7 +259,9 @@ export default function Users() {
           <Title level={3} style={{ margin: 0 }}>Thành viên</Title>
         </div>
         <div className="header-actions">
-          <Button type="primary" icon={<PlusOutlined />}>Thêm người dùng mới</Button>
+          <div className="header-actions">
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>Thêm người dùng mới</Button>
+          </div>
         </div>
       </div>
 
@@ -234,8 +287,9 @@ export default function Users() {
           placeholder="Lọc theo vai trò"
         >
           <Option value="">Tất cả vai trò</Option>
-          <Option value="ROLE_ADMIN">Admin</Option>
-          <Option value="ROLE_USER">User</Option>
+          <Option value="ROLE01">Admin</Option>
+          <Option value="ROLE02">Quản lý</Option>
+          <Option value="ROLE03">Nhân viên</Option>
         </Select>
       </div>
 
@@ -256,6 +310,115 @@ export default function Users() {
           className="members-table"
         />
       </div>
+
+      <Modal
+        title={editingUser ? "Sửa người dùng" : "Thêm người dùng mới"}
+        open={isModalOpen}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        okText="Lưu"
+        cancelText="Hủy"
+      >
+        <Form.Item
+          name="id"
+          label="Mã người dùng"
+          hidden
+          rules={[{ required: true, message: "Vui lòng nhập mã người dùng" }]}
+        >
+          <Input disabled />
+        </Form.Item>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="username"
+            label="Tên đăng nhập"
+            rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}
+          >
+            <Input disabled={!!editingUser} />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Vui lòng nhập email" },
+              { type: "email", message: "Email không hợp lệ" }
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          {!editingUser && (
+            <Form.Item
+              name="password"
+              label="Mật khẩu"
+              rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+            >
+              <Input.Password />
+            </Form.Item>
+          )}
+          <Form.Item
+            name="employeeName"
+            label="Tên hiển thị"
+            rules={[{ required: true, message: "Vui lòng nhập tên hiển thị" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="roleId"
+            label="Vai trò"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
+          >
+            <Select>
+              <Option value="ROLE01">Admin</Option>
+              <Option value="ROLE02">Quản lý</Option>
+              <Option value="ROLE03">Nhân viên</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.roleId !== currentValues.roleId}
+          >
+            {({ getFieldValue }) => {
+              const roleId = getFieldValue('roleId');
+              return (roleId === 'ROLE03' || roleId === 'ROLE02') ? (
+                <Form.Item
+                  name="employeeId"
+                  label="Chọn nhân viên"
+                  help="Chọn nhân viên để tự động điền thông tin"
+                >
+                  <Select
+                    showSearch
+                    optionFilterProp="children"
+                    onChange={(value) => {
+                      const emp = employees.find(e => e.id === value);
+                      if (emp) {
+                        form.setFieldsValue({
+                          email: emp.email,
+                          username: emp.email.split('@')[0],
+                          employeeName: emp.name
+                        });
+                      }
+                    }}
+                  >
+                    {employees.map(emp => (
+                      <Option key={emp.id} value={emp.id}>{emp.name} - {emp.email}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              ) : null;
+            }}
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+          >
+            <Select>
+              <Option value="Active">Hoạt động</Option>
+              <Option value="Inactive">Ngưng hoạt động</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
