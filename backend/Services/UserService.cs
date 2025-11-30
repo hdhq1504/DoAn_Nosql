@@ -41,7 +41,7 @@ namespace backend.Service
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            var cypher = $"MATCH (u:User {{Email: '{email}'}}) RETURN u";
+            var cypher = $"MATCH (u:User {{email: '{email}'}}) RETURN u";
             var doc = await RunCypherAsync(cypher);
 
             var results = doc.RootElement.GetProperty("results");
@@ -54,14 +54,35 @@ namespace backend.Service
             return JsonSerializer.Deserialize<User>(row.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        public async Task<User?> UpdateUserAsync(string email, User user)
+        public async Task<User?> UpdateUserAsync(string id, User user)
         {
             var cypher = $@"
-                MATCH (u:User {{Email: '{email}'}})
-                SET u.Avatar = '{user.Avatar}',
-                    u.Phone = '{user.Phone}',
-                    u.Address = '{user.Address}',
-                    u.Bio = '{user.Bio}'
+                MATCH (u:User {{id: '{id}'}})
+                SET u.avatar = '{user.Avatar}',
+                    u.phone = '{user.Phone}',
+                    u.address = '{user.Address}',
+                    u.bio = '{user.Bio}',
+                    u.status = '{user.Status}',
+                    u.roleId = '{user.RoleId}',
+                    u.employeeId = '{user.EmployeeId}'
+                
+                WITH u
+                // Update Role Relationship
+                OPTIONAL MATCH (u)-[r:HAS_ROLE]->()
+                DELETE r
+                WITH u
+                MATCH (newRole:Role {{id: '{user.RoleId}'}})
+                MERGE (u)-[:HAS_ROLE]->(newRole)
+
+                WITH u
+                // Update Employee Relationship
+                OPTIONAL MATCH (u)-[rel:IS_EMPLOYEE]->()
+                DELETE rel
+                WITH u
+                OPTIONAL MATCH (e:Employee) 
+                WHERE e.id = '{user.EmployeeId}' OR e.email = u.email
+                FOREACH (_ IN CASE WHEN e IS NOT NULL THEN [1] ELSE [] END | MERGE (u)-[:IS_EMPLOYEE]->(e))
+                
                 RETURN u";
 
             var doc = await RunCypherAsync(cypher);
@@ -77,7 +98,7 @@ namespace backend.Service
 
         public async Task<bool> DeleteUserAsync(string id)
         {
-            var cypher = $"MATCH (u:User {{Id: '{id}'}}) DETACH DELETE u";
+            var cypher = $"MATCH (u:User {{id: '{id}'}}) DETACH DELETE u";
             try
             {
                 await RunCypherAsync(cypher);
@@ -96,12 +117,12 @@ namespace backend.Service
             
             if (!string.IsNullOrEmpty(search))
             {
-                searchCondition.Add($"(toLower(u.Username) CONTAINS toLower('{search}') OR toLower(u.Email) CONTAINS toLower('{search}'))");
+                searchCondition.Add($"(toLower(u.username) CONTAINS toLower('{search}') OR toLower(u.email) CONTAINS toLower('{search}'))");
             }
 
             if (!string.IsNullOrEmpty(role) && role != "All")
             {
-                searchCondition.Add($"u.RoleId = '{role}'");
+                searchCondition.Add($"u.roleId = '{role}'");
             }
 
             var whereClause = searchCondition.Count > 0 ? "WHERE " + string.Join(" AND ", searchCondition) : "";
@@ -131,8 +152,8 @@ namespace backend.Service
                 MATCH (u:User) 
                 {whereClause}
                 OPTIONAL MATCH (u)-[:HAS_ROLE]->(r:Role)
-                OPTIONAL MATCH (e:Employee {{email: u.Email}})
-                RETURN u, r.Name as RoleName, e.name as EmployeeName, e.position as EmployeePosition, e.department as EmployeeDepartment
+                OPTIONAL MATCH (e:Employee {{email: u.email}})
+                RETURN u, r.name as RoleName, e.name as EmployeeName, e.position as EmployeePosition, e.department as EmployeeDepartment
                 SKIP {skip}
                 LIMIT {pageSize}";
 
@@ -188,18 +209,22 @@ namespace backend.Service
 
             var cypher = $@"
                 CREATE (u:User {{
-                    Id: '{user.Id}',
-                    Username: '{user.Username}',
-                    Email: '{user.Email}',
-                    Password: '{user.Password}',
-                    Avatar: '{user.Avatar}',
-                    RoleId: '{user.RoleId}',
-                    Status: '{user.Status}',
-                    CreatedAt: datetime()
+                    id: '{user.Id}',
+                    username: '{user.Username}',
+                    email: '{user.Email}',
+                    password: '{user.Password}',
+                    avatar: '{user.Avatar}',
+                    roleId: '{user.RoleId}',
+                    status: '{user.Status}',
+                    createdat: datetime()
                 }})
                 WITH u
                 MATCH (r:Role {{id: '{user.RoleId}'}})
                 MERGE (u)-[:HAS_ROLE]->(r)
+                WITH u
+                OPTIONAL MATCH (e:Employee) 
+                WHERE e.id = '{user.EmployeeId}' OR e.email = '{user.Email}'
+                FOREACH (_ IN CASE WHEN e IS NOT NULL THEN [1] ELSE [] END | MERGE (u)-[:IS_EMPLOYEE]->(e))
                 RETURN u";
 
             var doc = await RunCypherAsync(cypher);

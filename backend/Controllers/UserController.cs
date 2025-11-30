@@ -23,11 +23,10 @@ namespace backend.Controllers
             return Ok(user);
         }
 
-        [HttpPut("{email}")]
-        public async Task<IActionResult> UpdateUser(string email, [FromBody] User user)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] User user)
         {
-            var updatedUser = await _userService.UpdateUserAsync(email, user);
-            if (updatedUser == null) return NotFound();
+            var updatedUser = await _userService.UpdateUserAsync(id, user);
             if (updatedUser == null) return NotFound();
             return Ok(updatedUser);
         }

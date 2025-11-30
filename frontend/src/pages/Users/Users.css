@@ -1,7 +1,7 @@
 .user-management-page {
   padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  background-color: #f5f7fa;
+  min-height: 100vh;
 }
 
 .page-header {
@@ -11,101 +11,97 @@
   margin-bottom: 24px;
 }
 
-.header-actions {
-  display: flex;
-  gap: 12px;
+.header-title h3 {
+  margin: 0;
+  color: #1f2937;
 }
 
 .stats-container {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
-  flex: 1;
-  min-width: 150px;
-  text-align: center;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f0f0;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card.active {
-  background-color: #f9f9f9;
-  border-bottom: 2px solid #000;
-}
-
-.stat-card .ant-card-body {
-  padding: 16px;
+  border-left: 4px solid #1890ff;
 }
 
 .stat-value {
   font-size: 24px;
-  font-weight: 600;
-  color: #101828;
+  font-weight: 700;
+  color: #111827;
   margin-bottom: 4px;
 }
 
 .stat-label {
+  color: #6b7280;
   font-size: 14px;
-  color: #667085;
 }
 
 .filters-container {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  background: #fff;
-  padding: 12px 16px;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px 8px 0 0;
-  border-bottom: none;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .table-container {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 0 0 8px 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.members-table .ant-table-thead>tr>th {
+.members-table .ant-table-thead > tr > th {
   background: #f9fafb;
-  color: #667085;
+  font-weight: 600;
+}
+
+/* Drawer Styles */
+.user-drawer .ant-drawer-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+}
+
+.user-drawer .ant-drawer-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.user-drawer .ant-drawer-body {
+  padding: 24px;
+}
+
+.user-drawer .ant-form-item-label label {
   font-weight: 500;
+  color: #374151;
 }
 
-.members-table .ant-tag {
-  border-radius: 16px;
-  padding: 0 8px;
-  font-weight: 500;
+.user-drawer .ant-input,
+.user-drawer .ant-select-selector,
+.user-drawer .ant-input-password {
+  border-radius: 6px;
 }
 
-.pagination-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 24px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.pagination-info {
-  color: #344054;
-  font-size: 14px;
-}
-
-@media (max-width: 768px) {
-  .column-email {
-    display: none;
-  }
-
-  .stats-container {
-    gap: 12px;
-  }
-
-  .stat-card {
-    min-width: 45%;
-  }
+.user-drawer .ant-btn-primary {
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
 }

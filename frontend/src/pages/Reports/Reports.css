@@ -1,100 +1,128 @@
-@import "../../styles/variables.css";
+.reports-page {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
-/* Reports Page */
-.reports-page-modern {
+.reports-header {
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.reports-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.reports-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.report-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 24px;
+  height: 100%;
+}
+
+.report-card .ant-card-head {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 0 16px 0;
+  margin-bottom: 20px;
+  min-height: auto;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.report-card .ant-card-body {
   padding: 0;
 }
 
-.reports-page-modern .ant-typography {
-  margin-bottom: 24px;
+.ant-table-wrapper .ant-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
 }
 
-/* Statistics Row */
-.stats-row {
-  margin-bottom: 24px;
-}
-
-.stats-row .ant-card {
-  border-radius: 12px;
-  border: 1px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s;
-}
-
-.stats-row .ant-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-/* Toolbar Card */
-.toolbar-card {
-  margin-bottom: 16px;
-  border-radius: 12px;
-  border: 1px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-/* Table Card */
-.table-card {
-  border-radius: 12px;
-  border: 1px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.table-card .ant-table {
-  font-size: 14px;
-}
-
-.table-card .ant-table-thead>tr>th {
-  background: #fafafa;
+.ant-table-thead>tr>th {
+  background: #f3f4f6;
+  color: #374151;
   font-weight: 600;
-  color: #262626;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.table-card .ant-table-tbody>tr:hover>td {
-  background: #f5f5f5;
+.ant-table-tbody>tr>td {
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .toolbar-card .ant-row {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .toolbar-card .ant-btn {
-    width: 100%;
-  }
+.ant-table-tbody>tr:last-child>td {
+  border-bottom: none;
 }
 
-/* Animation */
-.stats-row .ant-card {
-  animation: fadeInUp 0.4s ease-out;
+.ant-table-tbody>tr.ant-table-row:hover>td {
+  background: #f9fafb !important;
 }
 
-.toolbar-card,
-.table-card {
-  animation: fadeIn 0.5s ease-out;
+.stat-item {
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 4px;
+}
 
-  to {
-    opacity: 1;
-  }
+.ant-divider-horizontal {
+  border-top-color: #e5e7eb;
+}
+
+.recharts-default-tooltip {
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  border-radius: 4px !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.reports-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
 }

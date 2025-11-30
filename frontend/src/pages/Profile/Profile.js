@@ -12,6 +12,7 @@ import {
   message,
   Divider,
   Tag,
+  Spin
 } from "antd";
 import {
   UserOutlined,
@@ -42,12 +43,13 @@ export default function Profile() {
     roleId: "",
   });
 
-  const API_URL = "http://localhost:5096/api";
+  const API_URL = "https://localhost:5001/api";
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const email = "admin@crm.com";
+        setLoading(true);
+        const email = "admin@crm.vn";
         const response = await axios.get(`${API_URL}/user/${email}`);
         const data = response.data;
 
@@ -70,7 +72,9 @@ export default function Profile() {
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
-        // message.error("Không thể tải thông tin người dùng");
+        message.error("Không thể tải thông tin người dùng");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -85,7 +89,7 @@ export default function Profile() {
         ...values,
       };
 
-      await axios.put(`${API_URL}/user/${userInfo.email}`, updatedUser);
+      await axios.put(`${API_URL}/user/${userInfo.id}`, updatedUser);
       setUserInfo(updatedUser);
       message.success("Cập nhật thông tin thành công!");
     } catch (error) {
@@ -109,7 +113,7 @@ export default function Profile() {
 
       setUserInfo((prev) => ({ ...prev, avatar: avatarUrl }));
 
-      await axios.put(`${API_URL}/user/${userInfo.email}`, {
+      await axios.put(`${API_URL}/user/${userInfo.id}`, {
         ...userInfo,
         avatar: avatarUrl,
       });
@@ -121,6 +125,14 @@ export default function Profile() {
     }
   };
 
+  if (loading && !userInfo.email) {
+    return (
+      <div className="profile-loading">
+        <Spin size="large" tip="Đang tải hồ sơ..." />
+      </div>
+    );
+  }
+
   return (
     <div className="profile-page-modern">
       <div className="profile-header-container">
@@ -128,7 +140,6 @@ export default function Profile() {
       </div>
 
       <Row gutter={[32, 32]}>
-        {/* Left Column - Profile Card */}
         <Col xs={24} lg={8}>
           <Card className="profile-card" bordered={false}>
             <div className="profile-avatar-section">
@@ -195,7 +206,6 @@ export default function Profile() {
           </Card>
         </Col>
 
-        {/* Right Column - Details Form */}
         <Col xs={24} lg={16}>
           <div className="details-section">
             <Title level={4} style={{ marginBottom: 24 }}>Thông tin cá nhân</Title>

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "lt+tke8bqgE=",
+  "dgSpecHash": "JnVnd4Dsn5A=",
   "success": true,
   "projectFilePath": "D:\\DevTools\\projects\\DoAn_Nosql\\backend\\backend.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\11a5h\\.nuget\\packages\\bogus\\35.6.5\\bogus.35.6.5.nupkg.sha512",
     "C:\\Users\\11a5h\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.0\\microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
     "C:\\Users\\11a5h\\.nuget\\packages\\microsoft.extensions.apidescription.server\\9.0.0\\microsoft.extensions.apidescription.server.9.0.0.nupkg.sha512",
     "C:\\Users\\11a5h\\.nuget\\packages\\microsoft.openapi\\1.6.25\\microsoft.openapi.1.6.25.nupkg.sha512",

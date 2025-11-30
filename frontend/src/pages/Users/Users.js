@@ -10,20 +10,27 @@ import {
   Avatar,
   Dropdown,
   message,
-  Modal,
+  Drawer,
   Select,
-  Form
+  Form,
+  Row,
+  Col,
+  Divider,
+  Modal // Import Modal here
 } from "antd";
 import { generateNextId } from "../../utils/idGenerator";
 import { employeeAPI } from "../../services/api";
 import {
   PlusOutlined,
-  DownloadOutlined,
   SearchOutlined,
   MoreOutlined,
   DeleteOutlined,
   EditOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  UserOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  SafetyCertificateOutlined
 } from "@ant-design/icons";
 import axios from "axios";
 import "./Users.css";
@@ -33,7 +40,6 @@ const { Option } = Select;
 const { confirm } = Modal;
 
 export default function Users() {
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [users, setUsers] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,7 +50,9 @@ export default function Users() {
 
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [form] = Form.useForm();
 
@@ -52,6 +60,7 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers(current, pageSize, searchText, roleFilter);
+    fetchEmployees();
   }, [current, pageSize, searchText, roleFilter]);
 
   const fetchUsers = async (page, pSize, search, role) => {
@@ -68,6 +77,15 @@ export default function Users() {
       message.error("Không thể tải danh sách người dùng");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await employeeAPI.getAll();
+      setEmployees(res.data || []);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
     }
   };
 
@@ -88,19 +106,19 @@ export default function Users() {
 
   const handleDelete = (id) => {
     confirm({
-      title: 'Bạn có chắc chắn muốn xóa người dùng này?',
+      title: 'Xóa người dùng?',
       icon: <ExclamationCircleOutlined />,
-      content: 'Hành động này không thể hoàn tác.',
+      content: 'Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa?',
       okText: 'Xóa',
       okType: 'danger',
       cancelText: 'Hủy',
       onOk: async () => {
         try {
           await axios.delete(`${API_URL}/user/${id}`);
-          message.success('Xóa người dùng thành công');
+          message.success('Đã xóa người dùng');
           fetchUsers(current, pageSize, searchText, roleFilter);
         } catch (error) {
-          message.error('Xóa người dùng thất bại');
+          message.error('Xóa thất bại');
         }
       },
     });
@@ -108,82 +126,77 @@ export default function Users() {
 
   const handleEdit = (record) => {
     setEditingUser(record);
-    form.setFieldsValue(record);
-    setIsModalOpen(true);
+    form.setFieldsValue({
+      ...record,
+      // If user is linked to an employee but doesn't have employeeId in record (legacy), try to find by email
+      employeeId: record.employeeId || employees.find(e => e.email === record.email)?.id
+    });
+    setIsDrawerOpen(true);
   };
 
-  const handleAdd = async () => {
+  const handleAdd = () => {
     setEditingUser(null);
     form.resetFields();
     const nextId = generateNextId(users, "U", 4);
-    form.setFieldsValue({ id: nextId, status: "Active" });
-
-    try {
-      const res = await employeeAPI.getAll();
-      setEmployees(res.data || []);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
-    }
-
-    setIsModalOpen(true);
+    form.setFieldsValue({ id: nextId, status: "Active", roleId: "ROLE03" });
+    setIsDrawerOpen(true);
   };
 
-  const handleModalOk = async () => {
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false);
+    form.resetFields();
+  };
+
+  const handleSave = async () => {
     try {
       const values = await form.validateFields();
+
+      // Add employeeId to values if selected
+      if (values.roleId === 'ROLE03' && values.employeeId) {
+        // Logic handled in backend via EmployeeId property
+      }
+
       if (editingUser) {
         await axios.put(`${API_URL}/user/${editingUser.id}`, values);
-        message.success("Cập nhật người dùng thành công");
+        message.success("Cập nhật thành công");
       } else {
         await axios.post(`${API_URL}/user`, values);
-        message.success("Thêm người dùng thành công");
+        message.success("Thêm mới thành công");
       }
-      setIsModalOpen(false);
+      setIsDrawerOpen(false);
       fetchUsers(current, pageSize, searchText, roleFilter);
     } catch (error) {
       console.error("Error saving user:", error);
-      message.error("Lỗi khi lưu người dùng");
+      message.error("Có lỗi xảy ra khi lưu thông tin");
     }
-  };
-
-  const handleModalCancel = () => {
-    setIsModalOpen(false);
   };
 
   const columns = [
     {
-      title: (
-        <Space>
-          Tên <DownloadOutlined style={{ fontSize: 10, transform: "rotate(180deg)" }} />
-        </Space>
-      ),
+      title: "Người dùng",
       dataIndex: "username",
       key: "username",
       render: (text, record) => (
         <Space>
-          <Avatar src={record.avatar} />
+          <Avatar src={record.avatar} icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <Text strong>
-              {record.employeeName || text} {record.email === "admin@crm.com" && <Tag style={{ marginLeft: 4 }}>Bạn</Tag>}
-            </Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {record.email}
-            </Text>
+            <Text strong>{record.employeeName || text}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
           </div>
         </Space>
       ),
     },
     {
-      title: "Chức vụ",
-      dataIndex: "employeePosition",
-      key: "employeePosition",
-      render: (text) => text || "-",
-    },
-    {
-      title: "Phòng ban",
-      dataIndex: "employeeDepartment",
-      key: "employeeDepartment",
-      render: (text) => text || "-",
+      title: "Thông tin nhân viên",
+      key: "employeeInfo",
+      render: (_, record) => (
+        record.employeePosition ? (
+          <Space direction="vertical" size={0}>
+            <Tag color="blue">{record.employeePosition}</Tag>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.employeeDepartment}</Text>
+          </Space>
+        ) : <Text type="secondary">-</Text>
+      )
     },
     {
       title: "Vai trò",
@@ -191,13 +204,16 @@ export default function Users() {
       key: "roleName",
       render: (roleName, record) => {
         let color = "default";
-        let label = roleName || record.roleId || "User";
+        let icon = <UserOutlined />;
+        let label = roleName || "User";
 
         if (record.roleId === "ROLE01") {
           color = "red";
+          icon = <SafetyCertificateOutlined />;
           label = "Admin";
         } else if (record.roleId === "ROLE02") {
           color = "gold";
+          icon = <IdcardOutlined />;
           label = "Quản lý";
         } else if (record.roleId === "ROLE03") {
           color = "blue";
@@ -205,7 +221,7 @@ export default function Users() {
         }
 
         return (
-          <Tag color={color} style={{ borderRadius: 12 }}>
+          <Tag color={color} icon={icon} style={{ borderRadius: 12, padding: '4px 10px' }}>
             {label}
           </Tag>
         );
@@ -216,26 +232,25 @@ export default function Users() {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag color={status === "Active" ? "success" : "default"}>{status || "Unknown"}</Tag>
+        <Tag color={status === "Active" ? "success" : "error"}>
+          {status === "Active" ? "Hoạt động" : "Ngưng hoạt động"}
+        </Tag>
       )
     },
     {
-      title: "Ngày tham gia",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date) => date ? new Date(date).toLocaleDateString() : "-",
-    },
-    {
       key: "action",
+      width: 60,
       render: (_, record) => (
         <Dropdown
           menu={{
             items: [
-              { key: "1", label: "Sửa người dùng", icon: <EditOutlined />, onClick: () => handleEdit(record) },
-              { key: "2", label: "Xóa người dùng", icon: <DeleteOutlined />, danger: true, onClick: () => handleDelete(record.id) },
+              { key: "1", label: "Chỉnh sửa", icon: <EditOutlined />, onClick: () => handleEdit(record) },
+              { type: 'divider' },
+              { key: "2", label: "Xóa", icon: <DeleteOutlined />, danger: true, onClick: () => handleDelete(record.id) },
             ],
           }}
           trigger={["click"]}
+          placement="bottomRight"
         >
           <Button type="text" icon={<MoreOutlined />} />
         </Dropdown>
@@ -243,46 +258,41 @@ export default function Users() {
     },
   ];
 
-  const onSelectChange = (newSelectedRowKeys) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
-
   return (
     <div className="user-management-page">
       <div className="page-header">
         <div className="header-title">
-          <Title level={3} style={{ margin: 0 }}>Thành viên</Title>
+          <Title level={3}>Quản lý thành viên</Title>
+          <Text type="secondary">Quản lý tài khoản và phân quyền truy cập</Text>
         </div>
-        <div className="header-actions">
-          <div className="header-actions">
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>Thêm người dùng mới</Button>
-          </div>
-        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd} size="large">
+          Thêm thành viên
+        </Button>
       </div>
 
       <div className="stats-container">
-        <Card className="stat-card active">
+        <Card className="stat-card active" bordered={false}>
           <div className="stat-value">{total}</div>
           <div className="stat-label">Tổng thành viên</div>
+        </Card>
+        <Card className="stat-card" bordered={false}>
+          <div className="stat-value">{users.filter(u => u.status === 'Active').length}</div>
+          <div className="stat-label">Đang hoạt động</div>
         </Card>
       </div>
 
       <div className="filters-container">
         <Input
-          prefix={<SearchOutlined />}
-          placeholder="Tìm kiếm thành viên"
+          prefix={<SearchOutlined className="text-gray-400" />}
+          placeholder="Tìm kiếm theo tên hoặc email..."
           style={{ width: 300 }}
           onChange={handleSearch}
           value={searchText}
+          allowClear
         />
         <Select
-          defaultValue=""
-          style={{ width: 200, marginLeft: 10 }}
+          value={roleFilter}
+          style={{ width: 200 }}
           onChange={handleRoleFilterChange}
           placeholder="Lọc theo vai trò"
         >
@@ -295,7 +305,6 @@ export default function Users() {
 
       <div className="table-container">
         <Table
-          rowSelection={rowSelection}
           columns={columns}
           dataSource={users}
           rowKey="id"
@@ -304,6 +313,7 @@ export default function Users() {
             pageSize: pageSize,
             total: total,
             showSizeChanger: true,
+            showTotal: (total) => `Tổng ${total} kết quả`
           }}
           loading={loading}
           onChange={handleTableChange}
@@ -311,67 +321,88 @@ export default function Users() {
         />
       </div>
 
-      <Modal
-        title={editingUser ? "Sửa người dùng" : "Thêm người dùng mới"}
-        open={isModalOpen}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        okText="Lưu"
-        cancelText="Hủy"
+      <Drawer
+        title={editingUser ? "Chỉnh sửa thành viên" : "Thêm thành viên mới"}
+        width={500}
+        onClose={handleDrawerClose}
+        open={isDrawerOpen}
+        className="user-drawer"
+        extra={
+          <Button type="primary" onClick={handleSave}>Lưu thay đổi</Button>
+        }
       >
-        <Form.Item
-          name="id"
-          label="Mã người dùng"
-          hidden
-          rules={[{ required: true, message: "Vui lòng nhập mã người dùng" }]}
-        >
-          <Input disabled />
-        </Form.Item>
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="username"
-            label="Tên đăng nhập"
-            rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}
-          >
-            <Input disabled={!!editingUser} />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email" },
-              { type: "email", message: "Email không hợp lệ" }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          {!editingUser && (
-            <Form.Item
-              name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          )}
-          <Form.Item
-            name="employeeName"
-            label="Tên hiển thị"
-            rules={[{ required: true, message: "Vui lòng nhập tên hiển thị" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="roleId"
-            label="Vai trò"
-            rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
-          >
-            <Select>
-              <Option value="ROLE01">Admin</Option>
-              <Option value="ROLE02">Quản lý</Option>
-              <Option value="ROLE03">Nhân viên</Option>
-            </Select>
-          </Form.Item>
+        <Form form={form} layout="vertical" requiredMark="optional">
+          <Form.Item name="id" hidden><Input /></Form.Item>
+
+          <Divider orientation="left">Thông tin đăng nhập</Divider>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: "Vui lòng nhập email" },
+                  { type: "email", message: "Email không hợp lệ" }
+                ]}
+              >
+                <Input prefix={<MailOutlined />} placeholder="example@company.com" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="username"
+                label="Tên đăng nhập"
+                rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}
+              >
+                <Input prefix={<UserOutlined />} placeholder="username" disabled={!!editingUser} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              {!editingUser && (
+                <Form.Item
+                  name="password"
+                  label="Mật khẩu"
+                  rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                >
+                  <Input.Password placeholder="••••••" />
+                </Form.Item>
+              )}
+            </Col>
+          </Row>
+
+          <Divider orientation="left">Phân quyền & Liên kết</Divider>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="roleId"
+                label="Vai trò"
+                rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
+              >
+                <Select placeholder="Chọn vai trò">
+                  <Option value="ROLE01">Admin</Option>
+                  <Option value="ROLE02">Quản lý</Option>
+                  <Option value="ROLE03">Nhân viên</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="status"
+                label="Trạng thái"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+              >
+                <Select>
+                  <Option value="Active">Hoạt động</Option>
+                  <Option value="Inactive">Ngưng hoạt động</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item
             noStyle
@@ -382,12 +413,17 @@ export default function Users() {
               return (roleId === 'ROLE03' || roleId === 'ROLE02') ? (
                 <Form.Item
                   name="employeeId"
-                  label="Chọn nhân viên"
-                  help="Chọn nhân viên để tự động điền thông tin"
+                  label="Liên kết nhân viên"
+                  tooltip="Chọn nhân viên để tự động đồng bộ thông tin và quyền hạn"
+                  rules={[{ required: roleId === 'ROLE03', message: "Vui lòng chọn nhân viên để liên kết" }]}
                 >
                   <Select
                     showSearch
+                    placeholder="Tìm kiếm nhân viên..."
                     optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
                     onChange={(value) => {
                       const emp = employees.find(e => e.id === value);
                       if (emp) {
@@ -398,27 +434,26 @@ export default function Users() {
                         });
                       }
                     }}
-                  >
-                    {employees.map(emp => (
-                      <Option key={emp.id} value={emp.id}>{emp.name} - {emp.email}</Option>
-                    ))}
-                  </Select>
+                    options={employees.map(emp => ({
+                      value: emp.id,
+                      label: `${emp.name} (${emp.email})`
+                    }))}
+                  />
                 </Form.Item>
               ) : null;
             }}
           </Form.Item>
+
           <Form.Item
-            name="status"
-            label="Trạng thái"
-            rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+            name="employeeName"
+            label="Tên hiển thị"
+            rules={[{ required: true, message: "Vui lòng nhập tên hiển thị" }]}
           >
-            <Select>
-              <Option value="Active">Hoạt động</Option>
-              <Option value="Inactive">Ngưng hoạt động</Option>
-            </Select>
+            <Input prefix={<IdcardOutlined />} placeholder="Họ và tên" />
           </Form.Item>
+
         </Form>
-      </Modal>
+      </Drawer>
     </div>
   );
 }

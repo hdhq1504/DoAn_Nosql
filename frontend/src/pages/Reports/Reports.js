@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Tabs,
   Card,
   Table,
   Row,
@@ -8,7 +7,6 @@ import {
   Typography,
   Spin,
   message,
-  Statistic,
   Progress
 } from "antd";
 import {
@@ -26,6 +24,7 @@ import {
 } from "recharts";
 import { analyticsAPI } from "../../services/api";
 import { UsergroupAddOutlined, TeamOutlined, DollarOutlined } from "@ant-design/icons";
+import "./Reports.css";
 
 const { Title } = Typography;
 
@@ -61,7 +60,7 @@ export default function Reports() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: 50 }}>
+      <div className="reports-loading">
         <Spin size="large" tip="Đang tải báo cáo..." />
       </div>
     );
@@ -71,7 +70,7 @@ export default function Reports() {
     { title: "Phân khúc", dataIndex: "segment", key: "segment" },
     { title: "Số lượng KH", dataIndex: "customerCount", key: "customerCount", sorter: (a, b) => a.customerCount - b.customerCount },
     { title: "Giá trị TB (LTV)", dataIndex: "averageLTV", key: "averageLTV", render: (val) => `₫${val.toLocaleString()}` },
-    { title: "Điểm hài lòng", dataIndex: "averageSatisfaction", key: "averageSatisfaction", render: (val) => <Progress percent={val * 10} steps={5} size="small" strokeColor="#52c41a" /> },
+    { title: "Điểm hài lòng", dataIndex: "averageSatisfaction", key: "averageSatisfaction", render: (val) => <Progress percent={val * 10} steps={5} size="small" strokeColor="#52c41a" showInfo={false} /> },
     { title: "Tương tác TB", dataIndex: "averageInteractions", key: "averageInteractions" },
   ];
 
@@ -81,101 +80,118 @@ export default function Reports() {
     { title: "Tasks hoàn thành", dataIndex: "completedTasks", key: "completedTasks", sorter: (a, b) => a.completedTasks - b.completedTasks },
     { title: "Doanh thu", dataIndex: "totalRevenue", key: "totalRevenue", render: (val) => `₫${val.toLocaleString()}`, sorter: (a, b) => a.totalRevenue - b.totalRevenue },
     { title: "Hoa hồng", dataIndex: "totalCommission", key: "totalCommission", render: (val) => `₫${val.toLocaleString()}` },
-    { title: "Hiệu suất", dataIndex: "performanceScore", key: "performanceScore", render: (val) => <Progress percent={val} size="small" /> },
+    { title: "Hiệu suất", dataIndex: "performanceScore", key: "performanceScore", render: (val) => <Progress percent={val * 10} size="small" showInfo={false} strokeColor="#1890ff" /> },
   ];
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   return (
-    <div style={{ padding: 24 }}>
-      <Title level={2}>Báo cáo & Phân tích</Title>
+    <div className="reports-page">
+      <div className="reports-header">
+        <h1 className="reports-title">Báo cáo & Phân tích</h1>
+        <p className="reports-subtitle">Tổng quan hiệu suất kinh doanh và nhân sự</p>
+      </div>
 
-      <Tabs defaultActiveKey="1" items={[
-        {
-          key: "1",
-          label: <span><UsergroupAddOutlined /> Phân tích Khách hàng</span>,
-          children: (
-            <Row gutter={[16, 16]}>
-              <Col xs={24} lg={12}>
-                <Card title="Phân bố khách hàng theo phân khúc">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={customerData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="customerCount"
-                        nameKey="segment"
-                        label
-                      >
-                        {customerData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Card>
-              </Col>
-              <Col xs={24} lg={12}>
-                <Card title="Chi tiết phân khúc">
-                  <Table dataSource={customerData} columns={customerColumns} rowKey="segment" pagination={false} />
-                </Card>
-              </Col>
-            </Row>
-          )
-        },
-        {
-          key: "2",
-          label: <span><TeamOutlined /> Hiệu suất Nhân viên</span>,
-          children: (
-            <Row gutter={[16, 16]}>
-              <Col span={24}>
-                <Card title="Bảng xếp hạng nhân viên">
-                  <Table dataSource={employeeData} columns={employeeColumns} rowKey="employeeId" />
-                </Card>
-              </Col>
-              <Col span={24}>
-                <Card title="Biểu đồ doanh thu nhân viên">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={employeeData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="employeeName" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => `₫${value.toLocaleString()}`} />
-                      <Legend />
-                      <Bar dataKey="totalRevenue" fill="#1890ff" name="Doanh thu" />
-                      <Bar dataKey="totalCommission" fill="#52c41a" name="Hoa hồng" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Card>
-              </Col>
-            </Row>
-          )
-        },
-        {
-          key: "3",
-          label: <span><DollarOutlined /> Báo cáo Doanh thu</span>,
-          children: (
-            <Card title="Xu hướng doanh thu">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" tickFormatter={(val) => `Tháng ${val}`} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `₫${value.toLocaleString()}`} />
+      <div className="report-section">
+        <div className="section-header">
+          <span className="section-title"><UsergroupAddOutlined /> Phân tích Khách hàng</span>
+        </div>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={10}>
+            <Card className="report-card" bordered={false} title="Phân bố theo phân khúc">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={customerData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="customerCount"
+                    nameKey="segment"
+                  >
+                    {customerData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+          </Col>
+          <Col xs={24} lg={14}>
+            <Card className="report-card" bordered={false} title="Chi tiết chỉ số phân khúc">
+              <Table
+                dataSource={customerData}
+                columns={customerColumns}
+                rowKey="segment"
+                pagination={false}
+                size="middle"
+              />
+            </Card>
+          </Col>
+        </Row>
+      </div>
+
+      <div className="report-section">
+        <div className="section-header">
+          <span className="section-title"><TeamOutlined /> Hiệu suất Nhân viên</span>
+        </div>
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
+            <Card className="report-card" bordered={false} title="Bảng xếp hạng hiệu suất">
+              <Table
+                dataSource={employeeData}
+                columns={employeeColumns}
+                rowKey="employeeId"
+                pagination={false}
+              />
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card className="report-card" bordered={false} title="Biểu đồ doanh thu & hoa hồng">
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={employeeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="employeeName" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: '#f3f4f6' }}
+                    formatter={(value) => `₫${value.toLocaleString()}`}
+                  />
                   <Legend />
-                  <Bar dataKey="totalRevenue" fill="#1890ff" name="Doanh thu" />
-                  <Bar dataKey="totalCommission" fill="#faad14" name="Hoa hồng" />
+                  <Bar dataKey="totalRevenue" fill="#3b82f6" name="Doanh thu" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Bar dataKey="totalCommission" fill="#10b981" name="Hoa hồng" radius={[4, 4, 0, 0]} barSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
-          )
-        }
-      ]} />
+          </Col>
+        </Row>
+      </div>
+
+      <div className="report-section">
+        <div className="section-header">
+          <span className="section-title"><DollarOutlined /> Báo cáo Doanh thu</span>
+        </div>
+        <Card className="report-card" bordered={false} title="Xu hướng doanh thu theo tháng">
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis dataKey="month" tickFormatter={(val) => `T${val}`} axisLine={false} tickLine={false} />
+              <YAxis axisLine={false} tickLine={false} />
+              <Tooltip
+                cursor={{ fill: '#f3f4f6' }}
+                formatter={(value) => `₫${value.toLocaleString()}`}
+              />
+              <Legend />
+              <Bar dataKey="totalRevenue" fill="#6366f1" name="Doanh thu" radius={[4, 4, 0, 0]} barSize={50} />
+              <Bar dataKey="totalCommission" fill="#f59e0b" name="Hoa hồng" radius={[4, 4, 0, 0]} barSize={50} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
     </div>
   );
 }
